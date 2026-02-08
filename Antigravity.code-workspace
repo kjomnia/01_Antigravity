@@ -1,14 +1,6 @@
 {
 	"folders": [
 		{
-			"name": "Config",
-			"path": "../LGU+/Config"
-		},
-		{
-			"name": "DT",
-			"path": "../LGU+/DT"
-		},
-		{
 			"name": "01_Antigravity",
 			"path": "."
 		}
