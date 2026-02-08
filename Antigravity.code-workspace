@@ -8,6 +8,10 @@
 		},
 		{
 			"path": "../LGU+/Config"
+		},
+		{
+			"name": "01_Antigravity",
+			"path": "01_Antigravity"
 		}
 	],
 	"settings": {}
