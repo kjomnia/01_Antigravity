@@ -3,6 +3,9 @@
 		{
 			"name": "01_Antigravity",
 			"path": "."
+		},
+		{
+			"path": "../LGU+/DT"
 		}
 	],
 	"settings": {}
