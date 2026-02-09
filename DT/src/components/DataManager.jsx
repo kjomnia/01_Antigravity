@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Upload, Download, Search, Trash2, FileSpreadsheet, Plus, X } from 'lucide-react';
+import { Upload, Download, Search, Trash2, FileSpreadsheet, Plus, X, Filter } from 'lucide-react';
 import { readDataFile, exportDataFile } from '../utils/excelUtils';
 
 const DataManager = ({ type, columns, title, data, setData }) => {
@@ -57,7 +57,12 @@ const DataManager = ({ type, columns, title, data, setData }) => {
     };
 
     const handleInputChange = (key, value) => {
-        setNewItem(prev => ({ ...prev, [key]: value }));
+        let finalValue = value;
+        // [신규] 대상 설비의 상징문자와 코드는 대문자 강제
+        if (type === 'equipment' && (key === 'symbol' || key === 'code')) {
+            finalValue = value.toUpperCase();
+        }
+        setNewItem(prev => ({ ...prev, [key]: finalValue }));
     };
 
     const handleFileUpload = async (e) => {
@@ -66,7 +71,16 @@ const DataManager = ({ type, columns, title, data, setData }) => {
 
         setFileName(file.name);
         try {
-            const loadedData = await readDataFile(file);
+            let loadedData = await readDataFile(file);
+
+            // [신규] 대상 설비의 상징문자와 코드는 대문자 강제 (파일 업로드 시)
+            if (type === 'equipment') {
+                loadedData = loadedData.map(item => ({
+                    ...item,
+                    symbol: item.symbol ? String(item.symbol).toUpperCase() : item.symbol,
+                    code: item.code ? String(item.code).toUpperCase() : item.code
+                }));
+            }
 
             // [수정] 중복 제외 후 병합 로직
             setData(prevData => {
@@ -161,6 +175,21 @@ const DataManager = ({ type, columns, title, data, setData }) => {
     };
 
     const [columnFilters, setColumnFilters] = useState({});
+
+    // [신규] 필터 입력창 표시 상태 관리
+    const [visibleFilters, setVisibleFilters] = useState(new Set());
+
+    const toggleFilter = (key) => {
+        setVisibleFilters(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) {
+                next.delete(key);
+            } else {
+                next.add(key);
+            }
+            return next;
+        });
+    };
 
     // 리사이즈 핸들러
     const startResize = (e, key) => {
@@ -272,6 +301,37 @@ const DataManager = ({ type, columns, title, data, setData }) => {
         return { displayHeaders: headers, dataKeys: keys };
     }, [data, columns]);
 
+    // [신규] 페이지별 필터 적용 컬럼 정의
+    const filterableColumns = useMemo(() => {
+        if (type === 'office') return ['teamName', 'locationType'];
+        if (type === 'rack') return ['modelId', 'code', 'ru', 'height', 'width', 'depth'];
+        // equipment는 제한 없음 (null이면 전체 허용)
+        if (type === 'equipment') return null;
+        return null;
+    }, [type]);
+
+    // [신규] 컬럼별 유니크 값 추출 (필터 자동완성용)
+    const uniqueValuesByColumn = useMemo(() => {
+        const values = {};
+        if (data.length === 0) return values;
+
+        dataKeys.forEach(key => {
+            const uniqueSet = new Set();
+            data.forEach(row => {
+                if (row[key] !== undefined && row[key] !== null && row[key] !== '') {
+                    let val = String(row[key]);
+                    // [신규] 랙 모델 ID는 앞 6자리만 추출하여 목록 구성
+                    if (type === 'rack' && key === 'modelId') {
+                        if (val.length >= 6) val = val.substring(0, 6);
+                    }
+                    uniqueSet.add(val);
+                }
+            });
+            values[key] = Array.from(uniqueSet).sort();
+        });
+        return values;
+    }, [data, dataKeys, type]);
+
     return (
         <div className="bg-white rounded-lg shadow-md p-6 h-full flex flex-col">
             <div className="flex justify-between items-center mb-6">
@@ -365,6 +425,9 @@ const DataManager = ({ type, columns, title, data, setData }) => {
                                 {displayHeaders.map((header, index) => {
                                     const key = dataKeys[index];
                                     const width = colWidths[key] || 150;
+                                    // [신규] 필터 적용 여부 확인
+                                    const isFilterable = !filterableColumns || filterableColumns.includes(key);
+
                                     return (
                                         <th
                                             key={header}
@@ -372,17 +435,46 @@ const DataManager = ({ type, columns, title, data, setData }) => {
                                             style={{ width: `${width}px` }}
                                         >
                                             <div className="flex flex-col gap-1 w-full h-full">
-                                                <div className="flex items-center justify-between px-2">
-                                                    <span>{header}</span>
+                                                <div
+                                                    className="relative flex items-center justify-center w-full h-6 font-bold text-center cursor-pointer select-none"
+                                                    onClick={() => isFilterable && toggleFilter(key)}
+                                                >
+                                                    <span className="w-full px-4 truncate">{header}</span>
+                                                    {isFilterable && (
+                                                        <div
+                                                            className="absolute right-0 top-1/2 transform -translate-y-1/2 p-1 flex items-center"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleFilter(key);
+                                                            }}
+                                                        >
+                                                            <Filter
+                                                                className={`w-3 h-3 hover:text-blue-600 transition-colors ${columnFilters[key] || visibleFilters.has(key) ? 'text-blue-600 fill-blue-100' : 'text-gray-400'}`}
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    placeholder="필터..."
-                                                    className="w-full px-2 py-1 text-xs font-normal border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
-                                                    value={columnFilters[key] || ''}
-                                                    onChange={(e) => handleColumnFilterChange(key, e.target.value)}
-                                                    onMouseDown={(e) => e.stopPropagation()} // 드래그 시작 방지
-                                                />
+                                                {isFilterable && visibleFilters.has(key) && (
+                                                    <>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="필터..."
+                                                            className="w-full px-2 py-1 text-xs font-normal border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-center animate-fadeIn"
+                                                            value={columnFilters[key] || ''}
+                                                            onChange={(e) => handleColumnFilterChange(key, e.target.value)}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            onMouseDown={(e) => e.stopPropagation()} // 드래그 시작 방지
+                                                            list={`datalist-filter-${key}`} // [신규] datalist 연결
+                                                            autoFocus
+                                                        />
+                                                        {/* [신규] 필터용 datalist */}
+                                                        <datalist id={`datalist-filter-${key}`}>
+                                                            {uniqueValuesByColumn[key]?.map((val, idx) => (
+                                                                <option key={`${key}-${idx}`} value={val} />
+                                                            ))}
+                                                        </datalist>
+                                                    </>
+                                                )}
                                             </div>
                                             <div
                                                 className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 hover:w-1.5 transition-all z-20 active:bg-blue-700"
@@ -404,7 +496,7 @@ const DataManager = ({ type, columns, title, data, setData }) => {
                                 const isSelected = selectedRows.has(originalIndex);
                                 return (
                                     <tr key={originalIndex} className={`border-b hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : 'bg-white'}`}>
-                                        <td className="px-4 py-4 w-10">
+                                        <td className="px-4 py-4 w-10 text-center">
                                             <input
                                                 type="checkbox"
                                                 checked={isSelected}
@@ -413,7 +505,7 @@ const DataManager = ({ type, columns, title, data, setData }) => {
                                             />
                                         </td>
                                         {dataKeys.map((key) => (
-                                            <td key={key} className="px-6 py-4 whitespace-nowrap font-medium text-gray-900 overflow-hidden text-ellipsis border-r border-transparent hover:border-gray-200">
+                                            <td key={key} className="px-6 py-4 whitespace-nowrap font-medium text-gray-900 overflow-hidden text-ellipsis border-r border-transparent hover:border-gray-200 text-center">
                                                 {row[key] || '-'}
                                             </td>
                                         ))}

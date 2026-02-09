@@ -61,3 +61,47 @@ export const matchKorean = (target, query) => {
 
     return false;
 };
+
+// 한글 자음/모음을 영문으로 매핑 (키보드 배열 기준)
+const KOREAN_TO_ENGLISH_MAP = {
+    'ㅂ': 'q', 'ㅃ': 'Q',
+    'ㅈ': 'w', 'ㅉ': 'W',
+    'ㄷ': 'e', 'ㄸ': 'E',
+    'ㄱ': 'r', 'ㄲ': 'R',
+    'ㅅ': 't', 'ㅆ': 'T',
+    'ㅛ': 'y', 'ㅕ': 'u',
+    'ㅑ': 'i', 'ㅐ': 'o',
+    'ㅔ': 'p',
+    'ㅁ': 'a', 'ㄴ': 's',
+    'ㅇ': 'd', 'ㄹ': 'f',
+    'ㅎ': 'g', 'ㅗ': 'h',
+    'ㅓ': 'j', 'ㅏ': 'k',
+    'ㅣ': 'l',
+    'ㅋ': 'z', 'ㅌ': 'x',
+    'ㅊ': 'c', 'ㅍ': 'v',
+    'ㅠ': 'b', 'ㅜ': 'n',
+    'ㅡ': 'm'
+};
+
+/**
+ * 한글 입력을 영문으로 변환 (자음/모음 기준)
+ * 예: 'ㅂ' -> 'Q', 'ㅈ' -> 'W'
+ * @param {string} text - 입력 문자열
+ * @returns {string} 영문 대문자로 변환된 문자열
+ */
+export const convertKoreanToEnglish = (text) => {
+    if (!text) return '';
+
+    return text.split('').map(char => {
+        // 한글 자음/모음인 경우 영문으로 변환
+        if (KOREAN_TO_ENGLISH_MAP[char]) {
+            return KOREAN_TO_ENGLISH_MAP[char].toUpperCase();
+        }
+        // 이미 영문인 경우 대문자로 변환
+        if (/[a-zA-Z]/.test(char)) {
+            return char.toUpperCase();
+        }
+        // 숫자나 기타 문자는 그대로 반환
+        return char;
+    }).join('');
+};

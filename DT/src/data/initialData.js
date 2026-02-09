@@ -27053,60 +27053,6 @@ export const initialRackData = [
     "depth": 650
   },
   {
-    "modelId": "RM1-BH80W062D070",
-    "code": "BH",
-    "modelName": "RM1-BH80W062D070",
-    "ru": 1,
-    "height": 8000,
-    "width": 620,
-    "depth": 700
-  },
-  {
-    "modelId": "RM1-BH80W063D035",
-    "code": "BH",
-    "modelName": "RM1-BH80W063D035",
-    "ru": 1,
-    "height": 8000,
-    "width": 630,
-    "depth": 350
-  },
-  {
-    "modelId": "RM1-BH83W190D060",
-    "code": "BH",
-    "modelName": "RM1-BH83W190D060",
-    "ru": 1,
-    "height": 8300,
-    "width": 1900,
-    "depth": 600
-  },
-  {
-    "modelId": "RM1-BH83W265D060",
-    "code": "BH",
-    "modelName": "RM1-BH83W265D060",
-    "ru": 1,
-    "height": 8300,
-    "width": 2650,
-    "depth": 600
-  },
-  {
-    "modelId": "RM1-BH83W270D080",
-    "code": "BH",
-    "modelName": "RM1-BH83W270D080",
-    "ru": 1,
-    "height": 8300,
-    "width": 2700,
-    "depth": 800
-  },
-  {
-    "modelId": "RM1-BH90W175D080",
-    "code": "BH",
-    "modelName": "RM1-BH90W175D080",
-    "ru": 1,
-    "height": 9000,
-    "width": 1750,
-    "depth": 800
-  },
-  {
     "modelId": "RM1-DH03W020D015",
     "code": "DH",
     "modelName": "RM1-DH03W020D015",
@@ -35016,52 +34962,8 @@ export const initialRackData = [
     "height": 3000,
     "width": 200,
     "depth": 150
-  },
-  {
-    "modelId": "RM1-WH64W053D017",
-    "code": "WH",
-    "modelName": "RM1-WH64W053D017",
-    "ru": 1,
-    "height": 6400,
-    "width": 530,
-    "depth": 170
-  },
-  {
-    "modelId": "RM1-WH64W055D020",
-    "code": "WH",
-    "modelName": "RM1-WH64W055D020",
-    "ru": 1,
-    "height": 6400,
-    "width": 550,
-    "depth": 200
-  },
-  {
-    "modelId": "RM1-WH65W055D020",
-    "code": "WH",
-    "modelName": "RM1-WH65W055D020",
-    "ru": 1,
-    "height": 6500,
-    "width": 550,
-    "depth": 200
-  },
-  {
-    "modelId": "RM1-WH70W045D035",
-    "code": "WH",
-    "modelName": "RM1-WH70W045D035",
-    "ru": 1,
-    "height": 7000,
-    "width": 450,
-    "depth": 350
-  },
-  {
-    "modelId": "RM1-WH70W060D015",
-    "code": "WH",
-    "modelName": "RM1-WH70W060D015",
-    "ru": 1,
-    "height": 7000,
-    "width": 600,
-    "depth": 150
   }
+
 ];
 export const initialEquipmentData = [
   {

@@ -3,7 +3,7 @@ import { Search, Save, RotateCcw, PenTool, Database, Printer } from 'lucide-reac
 import { exportDataFile } from '../utils/excelUtils';
 import SearchableSelect from './SearchableSelect';
 import ConfirmModal from './ConfirmModal';
-import { matchKorean } from '../utils/koreanUtils';
+import { matchKorean, convertKoreanToEnglish } from '../utils/koreanUtils';
 
 const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, setInputRows, onReset }) => {
     console.log(`[FieldInputManager] Rendering with ${inputRows?.length} rows`);
@@ -80,17 +80,18 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
     }, [officeData, officeSearchTerm]);
 
     // [신규] 유효한 RU, 높이, 상징(Code) 목록 추출 (랙 데이터 기반 - 정적)
-    const { validRUs, validHeights, uniqueSymbols } = useMemo(() => {
+    // [신규] 대상 설비 상징문자 목록 추출 (equipmentData 기반)
+    const { validRUs, validHeights, uniqueSymbols, uniqueHardwareSymbols } = useMemo(() => {
         const rus = new Set();
         const heights = new Set();
         const uSymbol = new Set();
+        const uHardwareSymbol = new Set();
 
         safeRackData.forEach(r => {
             if (!r) return;
             if (r.ru) rus.add(String(r.ru));
             if (r.height) {
                 const hStr = String(r.height);
-                heights.add(hStr);
                 heights.add(hStr);
                 // mm 단위 그대로 사용
             }
@@ -99,6 +100,20 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
             }
         });
 
+        // equipmentData에서 상징문자 추출
+        if (Array.isArray(equipmentData)) {
+            equipmentData.forEach(e => {
+                if (e && e.symbol) {
+                    uHardwareSymbol.add(String(e.symbol).toUpperCase());
+                }
+            });
+        }
+
+        // 'BK'는 기본적으로 허용 (빈 칸)
+        if (!uHardwareSymbol.has('BK')) {
+            uHardwareSymbol.add('BK');
+        }
+
         uSymbol.add('BK');
 
         const sortStr = (a, b) => a.localeCompare(b);
@@ -106,9 +121,10 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
         return {
             validRUs: Array.from(rus),
             validHeights: Array.from(heights),
-            uniqueSymbols: Array.from(uSymbol).sort(sortStr)
+            uniqueSymbols: Array.from(uSymbol).sort(sortStr),
+            uniqueHardwareSymbols: Array.from(uHardwareSymbol).sort(sortStr)
         };
-    }, [safeRackData]);
+    }, [safeRackData, equipmentData]);
 
     // [최적화] 자동완성용 데이터 생성 (비동기 처리로 UI 블로킹 방지)
     const [filterOptions, setFilterOptions] = useState({ uniqueHs: [], uniqueWs: [], uniqueDs: [] });
@@ -214,9 +230,9 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
             console.log(`[FieldInputManager] Change - idx: ${index}, key: ${key}, val: ${value}`);
             let newValue = value;
 
-            // 구역(ZONE), 위치(행) : 영문 대문자 1자리
+            // 구역(ZONE), 위치(행) : 영문 대문자 1자리 (한글 자동 변환)
             if (['zone', 'row'].includes(key)) {
-                let val = value.toUpperCase();
+                let val = convertKoreanToEnglish(value); // 한글 → 영문 변환
                 val = val.slice(-1); // 마지막 1글자만 유지
 
                 if (key === 'row') {
@@ -257,12 +273,22 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
             else if (['w', 'd'].includes(key)) {
                 newValue = value.slice(0, 3);
             }
-            // 대상 설비 (상징문자)
+            // 대상 설비 (상징문자) : 한글 자동 변환
             else if (key === 'type') {
+                newValue = convertKoreanToEnglish(value); // 한글 → 영문 변환
+
+                // [수정] equipmentData에서 추출한 상징문자 목록 사용
+                // 입력값이 비어있거나, 허용된 심볼 중 하나와 일치하거나, 허용된 심볼의 접두사인 경우만 허용
+                const isValidInput = newValue === '' || uniqueHardwareSymbols.some(sym => sym === newValue || sym.startsWith(newValue));
+
+                if (!isValidInput) {
+                    console.warn("비허용 상징문자입니다:", newValue);
+                    return; // 입력 무시
+                }
+            }
+            // 랙 위치 (rackLoc) : 영문 대문자 자동 변환
+            else if (key === 'rackLoc') {
                 newValue = value.toUpperCase();
-                const ALLOWED_SYMBOLS = ['T', 'Q', 'P', 'R', 'U', 'S', 'B', 'D', 'A', 'F', 'H', 'W', 'O', 'BK'];
-                const isValidInput = newValue === '' || ALLOWED_SYMBOLS.some(sym => sym === newValue || sym.startsWith(newValue));
-                if (!isValidInput) console.warn("비허용 상징문자입니다.");
             }
 
             const newRows = [...inputRows];
@@ -494,6 +520,20 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
         }, 100);
     };
 
+    // 랙 모델 QR 배경색 결정 함수
+    const getRackModelQrBgColor = (rackModelQr) => {
+        if (!rackModelQr || rackModelQr.trim() === '') return '';
+
+        // rackData에서 일치하는 모델 찾기 (modelId와 비교)
+        const found = safeRackData.find(r => r && r.modelId === rackModelQr);
+
+        if (found) {
+            return 'bg-green-100'; // 일치: 녹색
+        } else {
+            return 'bg-red-100'; // 불일치: 빨강
+        }
+    };
+
     // [신규] 초기 로드 및 리셋(리마운트) 시 첫 번째 칸 포커스
     React.useEffect(() => {
         setTimeout(() => {
@@ -602,7 +642,7 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                                     <td className="border p-0"><input id={`input-${idx}-w`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.w || ''} onChange={e => handleGridChange(idx, 'w', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'w')} onBlur={() => handleBlur(idx, 'w')} /></td>
                                     <td className="border p-0"><input id={`input-${idx}-d`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.d || ''} onChange={e => handleGridChange(idx, 'd', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'd')} onBlur={() => handleBlur(idx, 'd')} /></td>
                                     <td className="border p-0"><input id={`input-${idx}-rackIdQr`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.rackIdQr || ''} onChange={e => handleGridChange(idx, 'rackIdQr', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackIdQr')} /></td>
-                                    <td className="border p-0"><input id={`input-${idx}-rackModelQr`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.rackModelQr || ''} onChange={e => handleGridChange(idx, 'rackModelQr', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackModelQr')} /></td>
+                                    <td className="border p-0"><input id={`input-${idx}-rackModelQr`} autoComplete="off" className={`w-full h-full p-2 outline-none text-center ${getRackModelQrBgColor(row.rackModelQr)}`} value={row.rackModelQr || ''} onChange={e => handleGridChange(idx, 'rackModelQr', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackModelQr')} /></td>
                                     <td className="border p-0"><input id={`input-${idx}-rackLocQr`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.rackLocQr || ''} onChange={e => handleGridChange(idx, 'rackLocQr', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackLocQr')} /></td>
                                     <td className="border p-0"><input id={`input-${idx}-rackLoc`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.rackLoc || ''} onChange={e => handleGridChange(idx, 'rackLoc', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackLoc')} /></td>
                                 </tr>
