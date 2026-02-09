@@ -26,7 +26,7 @@
     ],
     "win": {
       "target": "portable",
-      "icon": "public/vite.svg"
+      "forceCodeSigning": false
     },
     "asar": true,
     "asarUnpack": [
@@ -46,6 +46,7 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "app-builder-bin": "^5.0.0-alpha.12",
     "autoprefixer": "^10.4.24",
     "electron": "^40.2.1",
     "electron-builder": "^26.7.0",
