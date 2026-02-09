@@ -3,7 +3,7 @@ setlocal
 cd /d "%~dp0"
 
 echo ========================================================
-echo Smart Station Manager 배포 파일 생성 스크립트
+echo Digital Twin 배포 파일 생성 스크립트
 echo ========================================================
 
 :: 1. 정리
@@ -28,14 +28,14 @@ mkdir release\dist\Application
 xcopy /s /e /y release\win-unpacked\* release\dist\Application\ > nul
 
 :: 4. Launcher 컴파일
-echo [4/5] Launcher 컴파일 중...
+echo [4/5] Launcher 컴파일 중... (DigitalTwin.exe)
 if not exist scripts\Launcher.cs (
     echo Launcher.cs가 없습니다. scripts 폴더에 Launcher.cs를 확인해주세요.
     pause
     exit /b 1
 )
 
-C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /nologo /target:winexe /out:release\dist\SmartStationManager.exe scripts\Launcher.cs
+C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /nologo /target:winexe /out:release\dist\DigitalTwin.exe scripts\Launcher.cs
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Launcher 컴파일 실패!
     pause
@@ -43,12 +43,12 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 :: 5. 압축
-echo [5/5] 최종 결과물 압축 중... (SmartStationManager_Launcher.zip)
-powershell "Compress-Archive -Path release\dist\* -DestinationPath release\SmartStationManager_Launcher.zip -Force"
+echo [5/5] 최종 결과물 압축 중... (Digital Twin.zip)
+powershell "Compress-Archive -Path release\dist\* -DestinationPath 'release\Digital Twin.zip' -Force"
 
 echo.
 echo ========================================================
 echo 모든 작업이 완료되었습니다!
-echo 생성된 파일: release\SmartStationManager_Launcher.zip
+echo 생성된 파일: release\Digital Twin.zip
 echo ========================================================
 pause
