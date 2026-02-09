@@ -165,4 +165,4 @@ const EquipmentWdmManager = ({ inputRows, setInputRows, onReset }) => {
     );
 };
 
-export default EquipmentWdmManager;
+export default React.memo(EquipmentWdmManager);

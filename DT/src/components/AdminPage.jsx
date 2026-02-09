@@ -283,4 +283,4 @@ export const initialEquipmentData = ${JSON.stringify(equipmentData, null, 2)};
     );
 };
 
-export default AdminPage;
+export default React.memo(AdminPage);

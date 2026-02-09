@@ -61,9 +61,7 @@ const App = () => {
     return loadFromStorage(STORAGE_KEYS.WDM_INPUT, Array.from({ length: 20 }, () => ({})));
   });
 
-  const [fieldKey, setFieldKey] = useState(0);
-  const [wireKey, setWireKey] = useState(0);
-  const [wdmKey, setWdmKey] = useState(0);
+
 
   // 5. Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -141,17 +139,14 @@ const App = () => {
     } catch (e) { console.error("Immediate save error", e); }
 
     if (type === 'field') {
-      console.log("[App] Resetting field input rows and incrementing key");
+      console.log("[App] Resetting field input rows");
       setFieldInputRows(emptyRows);
-      setFieldKey(prev => prev + 1);
     } else if (type === 'wire') {
-      console.log("[App] Resetting wire input rows and incrementing key");
+      console.log("[App] Resetting wire input rows");
       setWireInputRows(emptyRows);
-      setWireKey(prev => prev + 1);
     } else if (type === 'wdm') {
-      console.log("[App] Resetting wdm input rows and incrementing key");
+      console.log("[App] Resetting wdm input rows");
       setWdmInputRows(emptyRows);
-      setWdmKey(prev => prev + 1);
     }
   };
 
@@ -223,17 +218,18 @@ const App = () => {
         </div>
 
         <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative">
-          <div style={{ display: activeTab === 'admin' ? 'block' : 'none' }} className="h-full p-4 overflow-auto">
-            <AdminPage
-              officeData={officeData} setOfficeData={setOfficeData}
-              rackData={rackData} setRackData={setRackData}
-              equipmentData={equipmentData} setEquipmentData={setEquipmentData}
-            />
-          </div>
+          {activeTab === 'admin' && (
+            <div className="h-full p-4 overflow-auto">
+              <AdminPage
+                officeData={officeData} setOfficeData={setOfficeData}
+                rackData={rackData} setRackData={setRackData}
+                equipmentData={equipmentData} setEquipmentData={setEquipmentData}
+              />
+            </div>
+          )}
 
           <div style={{ display: activeTab === 'field' ? 'block' : 'none' }} className="h-full">
             <FieldInputManager
-              key={`field-mgr-${fieldKey}`}
               officeData={officeData}
               rackData={rackData}
               equipmentData={equipmentData}
@@ -245,7 +241,6 @@ const App = () => {
 
           <div style={{ display: activeTab === 'wire' ? 'block' : 'none' }} className="h-full">
             <WireRegistrationManager
-              key={`wire-mgr-${wireKey}`}
               inputRows={wireInputRows}
               setInputRows={setWireInputRows}
               onReset={() => handleFullReset('wire')}
@@ -254,7 +249,6 @@ const App = () => {
 
           <div style={{ display: activeTab === 'wdm' ? 'block' : 'none' }} className="h-full">
             <EquipmentWdmManager
-              key={`wdm-mgr-${wdmKey}`}
               inputRows={wdmInputRows}
               setInputRows={setWdmInputRows}
               onReset={() => handleFullReset('wdm')}

@@ -172,4 +172,4 @@ const WireRegistrationManager = ({ inputRows, setInputRows, onReset }) => {
     );
 };
 
-export default WireRegistrationManager;
+export default React.memo(WireRegistrationManager);

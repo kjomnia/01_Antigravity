@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Save, RotateCcw, PenTool, Database, Printer } from 'lucide-react';
 import { exportDataFile } from '../utils/excelUtils';
 import SearchableSelect from './SearchableSelect';
+import ConfirmModal from './ConfirmModal';
 import { matchKorean } from '../utils/koreanUtils';
 
 const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, setInputRows, onReset }) => {
@@ -16,6 +17,9 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
     // [신규] 랙 모델 검색 (4개 항목)
     const [rackSearchParams, setRackSearchParams] = useState({ symbol: '', h: '', w: '', d: '' });
     const [foundModelId, setFoundModelId] = useState('');
+
+    // 초기화 확인 모달 상태
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     // 중앙 그리드: 입력 데이터 -> App.jsx에서 Props로 전달받음
 
@@ -106,104 +110,97 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
         };
     }, [safeRackData]);
 
-    // [신규] 자동완성용 데이터 생성 (검색 조건에 따른 Cascading 필터링)
-    const { uniqueHs, uniqueWs, uniqueDs } = useMemo(() => {
-        const uH = new Set();
-        const uW = new Set();
-        const uD = new Set();
+    // [최적화] 자동완성용 데이터 생성 (비동기 처리로 UI 블로킹 방지)
+    const [filterOptions, setFilterOptions] = useState({ uniqueHs: [], uniqueWs: [], uniqueDs: [] });
+    const { uniqueHs, uniqueWs, uniqueDs } = filterOptions;
 
-        const currentSymbol = rackSearchParams.symbol;
-        const currentH = rackSearchParams.h;
-        const currentW = rackSearchParams.w;
+    React.useEffect(() => {
+        const calculateOptions = () => {
+            const uH = new Set();
+            const uW = new Set();
+            const uD = new Set();
 
-        // 1. Symbol에 따른 데이터 필터링
-        let filteredBySymbol;
+            const currentSymbol = rackSearchParams.symbol;
+            const currentH = rackSearchParams.h;
+            const currentW = rackSearchParams.w;
 
-        if (currentSymbol) {
-            filteredBySymbol = safeRackData.filter(r => r && String(r.code || '').toUpperCase() === currentSymbol); // [안전장치] r 존재 확인
+            // 1. Symbol에 따른 데이터 필터링
+            let filteredBySymbol;
 
-            if (['T', 'TU'].includes(currentSymbol)) {
-                filteredBySymbol = filteredBySymbol.filter(r => r && r.ru);
+            if (currentSymbol) {
+                filteredBySymbol = safeRackData.filter(r => r && String(r.code || '').toUpperCase() === currentSymbol);
+                if (['T', 'TU'].includes(currentSymbol)) {
+                    filteredBySymbol = filteredBySymbol.filter(r => r && r.ru);
+                } else {
+                    filteredBySymbol = filteredBySymbol.filter(r => r && r.height);
+                }
             } else {
-                filteredBySymbol = filteredBySymbol.filter(r => r && r.height);
+                filteredBySymbol = safeRackData.filter(r => r);
             }
-        } else {
-            // currentSymbol이 없을 때도 null 필터링 필요
-            filteredBySymbol = safeRackData.filter(r => r);
-        }
 
-        // 2. 필터링된 데이터 기반으로 자동완성 목록 생성
-        // Height/RU suggestion
-        filteredBySymbol.forEach(r => {
-            if (['T', 'TU'].includes(currentSymbol)) {
-                if (r.ru) uH.add(String(r.ru));
-            } else {
-                if (r.height) {
-                    const hNum = parseInt(r.height, 10);
-                    // 높이는 mm 단위 그대로 보여주기
-                    if (!isNaN(hNum)) {
-                        uH.add(String(hNum));
-                    } else {
-                        uH.add(String(r.height));
+            // 2. 필터링된 데이터 기반으로 자동완성 목록 생성
+            filteredBySymbol.forEach(r => {
+                if (['T', 'TU'].includes(currentSymbol)) {
+                    if (r.ru) uH.add(String(r.ru));
+                } else {
+                    if (r.height) {
+                        const hNum = parseInt(r.height, 10);
+                        if (!isNaN(hNum)) uH.add(String(hNum));
+                        else uH.add(String(r.height));
                     }
                 }
-            }
-        });
+            });
 
-        // Width 목록 (Symbol + Height 필터링)
-        let filteredByHeight = filteredBySymbol;
-        if (currentH) {
-            filteredByHeight = filteredBySymbol.filter(r => {
-                if (['T', 'TU'].includes(currentSymbol)) {
-                    return String(r.ru) === currentH;
-                } else {
-                    const hMm = parseInt(currentH, 10);
-                    const rH = parseInt(r.height, 10);
-                    return (rH === hMm);
+            let filteredByHeight = filteredBySymbol;
+            if (currentH) {
+                filteredByHeight = filteredBySymbol.filter(r => {
+                    if (['T', 'TU'].includes(currentSymbol)) {
+                        return String(r.ru) === currentH;
+                    } else {
+                        const hMm = parseInt(currentH, 10);
+                        const rH = parseInt(r.height, 10);
+                        return (rH === hMm);
+                    }
+                });
+            }
+
+            (currentH ? filteredByHeight : filteredBySymbol).forEach(r => {
+                if (r.width) {
+                    const wNum = parseInt(r.width, 10);
+                    if (!isNaN(wNum)) uW.add(String(wNum));
+                    else uW.add(String(r.width));
                 }
             });
-        }
 
-        (currentH ? filteredByHeight : filteredBySymbol).forEach(r => {
-            if (r.width) {
-                const wNum = parseInt(r.width, 10);
-                if (!isNaN(wNum)) {
-                    uW.add(String(wNum));
-                } else {
-                    uW.add(String(r.width));
-                }
+            let filteredByWidth = filteredByHeight;
+            if (currentW) {
+                filteredByWidth = filteredByHeight.filter(r => {
+                    const wMm = parseInt(currentW, 10);
+                    const rW = parseInt(r.width, 10);
+                    return (rW === wMm);
+                });
             }
-        });
 
-        // Depth 목록 (Symbol + Height + Width 필터링)
-        let filteredByWidth = filteredByHeight;
-        if (currentW) {
-            filteredByWidth = filteredByHeight.filter(r => {
-                const wMm = parseInt(currentW, 10);
-                const rW = parseInt(r.width, 10);
-                return (rW === wMm);
+            (currentW ? filteredByWidth : (currentH ? filteredByHeight : filteredBySymbol)).forEach(r => {
+                if (r.depth) {
+                    const dNum = parseInt(r.depth, 10);
+                    if (!isNaN(dNum)) uD.add(String(dNum));
+                    else uD.add(String(r.depth));
+                }
             });
-        }
 
-        (currentW ? filteredByWidth : (currentH ? filteredByHeight : filteredBySymbol)).forEach(r => {
-            if (r.depth) {
-                const dNum = parseInt(r.depth, 10);
-                if (!isNaN(dNum)) {
-                    uD.add(String(dNum));
-                } else {
-                    uD.add(String(r.depth));
-                }
-            }
-        });
+            const sortNum = (a, b) => parseInt(a, 10) - parseInt(b, 10);
 
-        // 정렬
-        const sortNum = (a, b) => parseInt(a, 10) - parseInt(b, 10);
-
-        return {
-            uniqueHs: Array.from(uH).sort(sortNum),
-            uniqueWs: Array.from(uW).sort(sortNum),
-            uniqueDs: Array.from(uD).sort(sortNum)
+            setFilterOptions({
+                uniqueHs: Array.from(uH).sort(sortNum),
+                uniqueWs: Array.from(uW).sort(sortNum),
+                uniqueDs: Array.from(uD).sort(sortNum)
+            });
         };
+
+        // UI 렌더링을 양보하기 위해 setTimeout 사용
+        const timer = setTimeout(calculateOptions, 0);
+        return () => clearTimeout(timer);
     }, [safeRackData, rackSearchParams.symbol, rackSearchParams.h, rackSearchParams.w]);
 
     // 국사 선택 핸들러
@@ -462,20 +459,39 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
 
         if (result.success) {
             alert(result.message);
-        } else {
             alert("출력 오류: " + result.message);
         }
     };
 
     const handleReset = () => {
-        if (confirm("입력된 내용을 모두 초기화하시겠습니까?")) {
-            console.log("[FieldInputManager] Reset sequence started");
-            if (typeof onReset === 'function') {
-                onReset();
-            } else {
-                setInputRows(Array.from({ length: 20 }, () => ({})));
-            }
+        setShowConfirmModal(true);
+    };
+
+    const handleConfirmReset = () => {
+        setShowConfirmModal(false);
+
+        console.log("[FieldInputManager] Reset sequence started");
+
+        // 1. 공통 데이터 리셋
+        if (typeof onReset === 'function') {
+            onReset();
+        } else {
+            setInputRows(Array.from({ length: 20 }, () => ({})));
         }
+
+        // 2. 로컬 상태 리셋
+        setSelectedOffice(null);
+        setOfficeSearchTerm('');
+        setRackSearchParams({ symbol: '', h: '', w: '', d: '' });
+        setFoundModelId('');
+
+        // 3. 첫 번째 입력 필드에 즉시 포커스
+        setTimeout(() => {
+            const firstInput = document.getElementById('input-0-zone');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        }, 100);
     };
 
     // [신규] 초기 로드 및 리셋(리마운트) 시 첫 번째 칸 포커스
@@ -675,9 +691,17 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                     </div>
                 </div>
             </div>
+
+            {/* 초기화 확인 모달 */}
+            <ConfirmModal
+                isOpen={showConfirmModal}
+                message="입력된 내용을 모두 초기화하시겠습니까?"
+                onConfirm={handleConfirmReset}
+                onCancel={() => setShowConfirmModal(false)}
+            />
         </div>
     );
 };
 
 // export default React.memo(FieldInputManager);
-export default FieldInputManager;
+export default React.memo(FieldInputManager);

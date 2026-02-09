@@ -174,3 +174,11 @@ ipcMain.handle('save-ini-file', async (event, content) => {
         return { success: false, message: error.message };
     }
 });
+
+// IPC Handler for Window Focus
+ipcMain.on('focus-window', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.focus();
+        mainWindow.show();
+    }
+});
