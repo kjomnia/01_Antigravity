@@ -175,6 +175,59 @@ ipcMain.handle('save-ini-file', async (event, content) => {
     }
 });
 
+// [신규] IPC Handler for Saving Image
+// [수정] 이미지 저장 경로 설정 함수 (실행 파일 위치 기준 'img' 폴더)
+function getImagesDir() {
+    // 패키징 된 경우: 실행 파일(exe)이 있는 폴더의 img 폴더
+    // 개발 모드: 프로젝트 루트(electron-main.cjs 위치)의 img 폴더
+    const basePath = app.isPackaged
+        ? path.dirname(app.getPath('exe'))
+        : __dirname;
+    return path.join(basePath, 'img');
+}
+
+// [신규] IPC Handler for Saving Image
+ipcMain.handle('save-image', async (event, { filename, buffer }) => {
+    try {
+        const imagesDir = getImagesDir();
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+
+        const filePath = path.join(imagesDir, filename);
+        fs.writeFileSync(filePath, Buffer.from(buffer)); // buffer is ArrayBuffer from renderer
+        return { success: true, path: filePath };
+    } catch (error) {
+        console.error('Save image error:', error);
+        return { success: false, message: error.message };
+    }
+});
+
+// [신규] IPC Handler for Reading Image
+ipcMain.handle('read-image', async (event, filename) => {
+    try {
+        const imagesDir = getImagesDir();
+        const filePath = path.join(imagesDir, filename);
+
+        if (fs.existsSync(filePath)) {
+            const fileData = fs.readFileSync(filePath);
+            const base64 = fileData.toString('base64');
+            // 확장자에 따라 mime type 결정 (간단하게 처리)
+            const ext = path.extname(filename).toLowerCase();
+            let mimeType = 'image/jpeg';
+            if (ext === '.png') mimeType = 'image/png';
+            else if (ext === '.gif') mimeType = 'image/gif';
+            else if (ext === '.webp') mimeType = 'image/webp';
+
+            return { success: true, data: `data:${mimeType};base64,${base64}` };
+        }
+        return { success: false, message: 'Image not found' };
+    } catch (error) {
+        console.error('Read image error:', error);
+        return { success: false, message: error.message };
+    }
+});
+
 // IPC Handler for Window Focus
 ipcMain.on('focus-window', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {

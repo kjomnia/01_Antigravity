@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Save, RotateCcw, PenTool, Database, Printer } from 'lucide-react';
+import { Search, Save, RotateCcw, PenTool, Database, Printer, Image as ImageIcon, X } from 'lucide-react';
 import { exportDataFile } from '../utils/excelUtils';
 import SearchableSelect from './SearchableSelect';
 import ConfirmModal from './ConfirmModal';
@@ -17,6 +17,11 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
     // [신규] 랙 모델 검색 (4개 항목)
     const [rackSearchParams, setRackSearchParams] = useState({ symbol: '', h: '', w: '', d: '' });
     const [foundModelId, setFoundModelId] = useState('');
+    const [foundModelImage, setFoundModelImage] = useState(null); // [신규] 발견된 모델의 이미지 파일명
+
+    // [신규] 이미지 보기 모달 상태
+    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+    const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
 
     // 초기화 확인 모달 상태
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -31,6 +36,7 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
         // [수정] BK 상징문자 처리: 규격 입력 없이 BLANK 반환
         if (newParams.symbol === 'BK') {
             setFoundModelId('BLANK');
+            setFoundModelImage(null);
             return;
         }
 
@@ -64,8 +70,10 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
             });
 
             setFoundModelId(found ? found.modelId : '일치하는 모델 없음');
+            setFoundModelImage(found ? found.imageFile : null); // [신규] 이미지 설정
         } else {
             setFoundModelId('');
+            setFoundModelImage(null); // [신규] 이미지 초기화
         }
     };
 
@@ -335,7 +343,10 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                 const hPadded = String(updatedRow.h).padStart(2, '0');
                 const wPadded = String(updatedRow.w).padStart(3, '0');
                 const dPadded = String(updatedRow.d).padStart(3, '0');
-                updatedRow.rackModelQr = `RM1-${updatedRow.type}U${hPadded}W${wPadded}D${dPadded}`;
+
+                // [수정] T는 U(Unit), 그 외는 H(Height) 접미사 사용
+                const suffix = updatedRow.type === 'T' ? 'U' : 'H';
+                updatedRow.rackModelQr = `RM1-${updatedRow.type}${suffix}${hPadded}W${wPadded}D${dPadded}`;
             } else if (['type', 'h', 'w', 'd'].includes(key)) {
                 updatedRow.rackModelQr = '';
             }
@@ -371,9 +382,10 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
             if (currentType === 'T') {
                 newValue = value.padStart(2, '0');
             } else if (currentType) {
-                if (newValue.endsWith('0') && newValue.length > 1) {
-                    newValue = newValue.slice(0, -1);
-                }
+                // [수정] 끝자리 0 제거 로직 삭제 (10 입력 시 01 되는 문제 해결)
+                // if (newValue.endsWith('0') && newValue.length > 1) {
+                //    newValue = newValue.slice(0, -1);
+                // }
                 newValue = newValue.padStart(2, '0');
             }
             if (newValue !== value) needsUpdate = true;
@@ -510,6 +522,7 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
         setOfficeSearchTerm('');
         setRackSearchParams({ symbol: '', h: '', w: '', d: '' });
         setFoundModelId('');
+        setFoundModelImage(null);
 
         // 3. 첫 번째 입력 필드에 즉시 포커스
         setTimeout(() => {
@@ -518,6 +531,29 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                 firstInput.focus();
             }
         }, 100);
+    };
+
+    // [신규] 이미지 모달 열기
+    const handleOpenImageModal = async () => {
+        if (!foundModelImage || !window.electronAPI) return;
+
+        try {
+            const result = await window.electronAPI.readImage(foundModelImage);
+            if (result.success) {
+                setImagePreviewUrl(result.data);
+                setIsImageModalOpen(true);
+            } else {
+                alert("이미지를 불러올 수 없습니다: " + result.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("이미지 로드 중 오류가 발생했습니다.");
+        }
+    };
+
+    const handleCloseImageModal = () => {
+        setIsImageModalOpen(false);
+        setImagePreviewUrl(null);
     };
 
     // 랙 모델 QR 배경색 결정 함수
@@ -597,6 +633,16 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                             <div className={`px-4 py-1 rounded font-medium border ${foundModelId === '일치하는 모델 없음' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
                                 {foundModelId}
                             </div>
+                        )}
+
+                        {/* [신규] 사진 보기 버튼 */}
+                        {foundModelId && foundModelId !== '일치하는 모델 없음' && foundModelImage && (
+                            <button
+                                onClick={handleOpenImageModal}
+                                className="flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 text-sm font-medium border border-indigo-200 transition-colors"
+                            >
+                                <ImageIcon className="w-4 h-4" /> 사진
+                            </button>
                         )}
                     </div>
 
@@ -732,13 +778,33 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                 </div>
             </div>
 
-            {/* 초기화 확인 모달 */}
             <ConfirmModal
                 isOpen={showConfirmModal}
                 message="입력된 내용을 모두 초기화하시겠습니까?"
                 onConfirm={handleConfirmReset}
                 onCancel={() => setShowConfirmModal(false)}
             />
+
+            {/* [신규] 이미지 보기 모달 */}
+            {isImageModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={handleCloseImageModal}>
+                    <div className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl max-h-[90vh] flex flex-col relative" onClick={e => e.stopPropagation()}>
+                        <div className="p-2 flex justify-between items-center border-b">
+                            <h3 className="font-bold text-gray-700 px-2">랙 모델 사진 ({foundModelId})</h3>
+                            <button onClick={handleCloseImageModal} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                                <X className="w-6 h-6 text-gray-500" />
+                            </button>
+                        </div>
+                        <div className="p-4 overflow-auto flex-1 flex items-center justify-center bg-gray-100">
+                            {imagePreviewUrl ? (
+                                <img src={imagePreviewUrl} alt="Rack Model" className="max-w-full max-h-[70vh] object-contain shadow-md" />
+                            ) : (
+                                <div className="text-gray-400">이미지 로딩 중...</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Upload, Download, Search, Trash2, FileSpreadsheet, Plus, X, Filter } from 'lucide-react';
+import { Upload, Download, Search, Trash2, FileSpreadsheet, Plus, X, Filter, Image as ImageIcon } from 'lucide-react';
 import { readDataFile, exportDataFile } from '../utils/excelUtils';
 
 const DataManager = ({ type, columns, title, data, setData }) => {
@@ -254,7 +254,14 @@ const DataManager = ({ type, columns, title, data, setData }) => {
     };
 
     const filteredData = useMemo(() => {
-        let result = data.map((row, idx) => ({ ...row, _originalIdx: idx }));
+        let result = data.map((row, idx) => {
+            // [신규] 랙 모델인 경우 이미지 등록 여부 가상 필드 추가
+            const virtualFields = {};
+            if (type === 'rack') {
+                virtualFields.imageStatus = row.imageFile ? "등록" : "미등록";
+            }
+            return { ...row, ...virtualFields, _originalIdx: idx };
+        });
 
         // 1. Global Search
         if (searchTerm) {
@@ -298,8 +305,14 @@ const DataManager = ({ type, columns, title, data, setData }) => {
             }
         });
 
+        // [신규] 랙 모델인 경우 '사진' 컬럼 추가
+        if (type === 'rack') {
+            keys.push('imageStatus');
+            headers.push('사진');
+        }
+
         return { displayHeaders: headers, dataKeys: keys };
-    }, [data, columns]);
+    }, [data, columns, type]);
 
     // [신규] 페이지별 필터 적용 컬럼 정의
     const filterableColumns = useMemo(() => {
@@ -325,6 +338,10 @@ const DataManager = ({ type, columns, title, data, setData }) => {
                         if (val.length >= 6) val = val.substring(0, 6);
                     }
                     uniqueSet.add(val);
+                } else if (type === 'rack' && key === 'imageStatus') {
+                    // [신규] 가상 필드 처리
+                    const status = row.imageFile ? "등록" : "미등록";
+                    uniqueSet.add(status);
                 }
             });
             values[key] = Array.from(uniqueSet).sort();
@@ -586,6 +603,15 @@ const DataManager = ({ type, columns, title, data, setData }) => {
                                     </div>
                                 );
                             })}
+
+                            {/* [신규] 랙 모델인 경우 이미지 업로드 필드 추가 */}
+                            {type === 'rack' && (
+                                <ImageUploadField
+                                    currentImage={newItem.imageFile}
+                                    onImageChange={(filename) => setNewItem(prev => ({ ...prev, imageFile: filename }))}
+                                    electronAPI={window.electronAPI}
+                                />
+                            )}
                         </div>
 
 
@@ -606,6 +632,71 @@ const DataManager = ({ type, columns, title, data, setData }) => {
                     </div>
                 </div>
             )}
+        </div>
+    );
+};
+
+// [신규] 이미지 업로드 컴포넌트 (랙 모델 전용)
+const ImageUploadField = ({ currentImage, onImageChange, electronAPI }) => {
+    const [preview, setPreview] = useState(null);
+
+    useEffect(() => {
+        if (currentImage && electronAPI) {
+            electronAPI.readImage(currentImage).then(res => {
+                if (res.success) setPreview(res.data);
+            });
+        }
+    }, [currentImage, electronAPI]);
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !electronAPI) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const buffer = e.target.result;
+            // 파일명 고유화 (timestamp 추가)
+            const ext = file.name.split('.').pop();
+            const filename = `rack_${new Date().getTime()}.${ext}`;
+
+            try {
+                const result = await electronAPI.saveImage({ filename, buffer });
+                if (result.success) {
+                    onImageChange(filename);
+                    // alert("이미지가 저장되었습니다."); // [수정] 포커스 문제로 alert 제거
+                    if (electronAPI.focusWindow) electronAPI.focusWindow(); // [수정] 강제 포커스
+                } else {
+                    alert("이미지 저장 실패: " + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("이미지 저장 중 오류 발생");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    return (
+        <div className="border p-3 rounded-lg bg-gray-50">
+            <label className="block text-sm font-medium text-gray-700 mb-2">랙 모델 사진</label>
+            <div className="flex gap-4 items-start">
+                <div className="w-24 h-24 bg-gray-200 rounded flex items-center justify-center overflow-hidden border">
+                    {preview ? (
+                        <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                        <span className="text-xs text-gray-400">No Image</span>
+                    )}
+                </div>
+                <div className="flex-1">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">※ 이미지가 즉시 저장됩니다.</p>
+                </div>
+            </div>
         </div>
     );
 };
