@@ -543,11 +543,13 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                 setImagePreviewUrl(result.data);
                 setIsImageModalOpen(true);
             } else {
-                alert("이미지를 불러올 수 없습니다: " + result.message);
+                // alert("이미지를 불러올 수 없습니다: " + result.message); // [수정] 포커스 문제로 alert 제거
+                if (window.electronAPI && window.electronAPI.focusWindow) window.electronAPI.focusWindow();
             }
         } catch (err) {
             console.error(err);
-            alert("이미지 로드 중 오류가 발생했습니다.");
+            // alert("이미지 로드 중 오류가 발생했습니다."); // [수정] 포커스 문제로 alert 제거
+            if (window.electronAPI && window.electronAPI.focusWindow) window.electronAPI.focusWindow();
         }
     };
 

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Upload, Download, Search, Trash2, FileSpreadsheet, Plus, X, Filter, Image as ImageIcon } from 'lucide-react';
+import { Upload, Download, Search, Trash2, FileSpreadsheet, Plus, X, Filter, Image as ImageIcon, ArrowUp, ArrowDown } from 'lucide-react';
 import { readDataFile, exportDataFile } from '../utils/excelUtils';
 
 const DataManager = ({ type, columns, title, data, setData }) => {
@@ -179,6 +179,17 @@ const DataManager = ({ type, columns, title, data, setData }) => {
     // [신규] 필터 입력창 표시 상태 관리
     const [visibleFilters, setVisibleFilters] = useState(new Set());
 
+    // [신규] 정렬 상태 관리
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
     const toggleFilter = (key) => {
         setVisibleFilters(prev => {
             const next = new Set(prev);
@@ -284,8 +295,32 @@ const DataManager = ({ type, columns, title, data, setData }) => {
             });
         }
 
+        // 3. Sorting (Global & Column Filter 후 적용)
+        if (sortConfig.key) {
+            result.sort((a, b) => {
+                let aVal = a[sortConfig.key];
+                let bVal = b[sortConfig.key];
+
+                // undefined/null/empty string 처리
+                if (aVal === undefined || aVal === null) aVal = '';
+                if (bVal === undefined || bVal === null) bVal = '';
+
+                // 숫자형 데이터인지 확인 (간단한 체크)
+                const aNum = Number(aVal);
+                const bNum = Number(bVal);
+
+                if (!isNaN(aNum) && !isNaN(bNum) && String(aVal).trim() !== '' && String(bVal).trim() !== '') {
+                    return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
+                }
+
+                return sortConfig.direction === 'asc'
+                    ? String(aVal).localeCompare(String(bVal))
+                    : String(bVal).localeCompare(String(aVal));
+            });
+        }
+
         return result;
-    }, [data, searchTerm, columnFilters]);
+    }, [data, searchTerm, columnFilters, sortConfig]);
 
     // 동적 컬럼 결정: 정의된 columns + 데이터에만 있는 추가 컬럼
     const { displayHeaders, dataKeys } = useMemo(() => {
@@ -453,17 +488,28 @@ const DataManager = ({ type, columns, title, data, setData }) => {
                                         >
                                             <div className="flex flex-col gap-1 w-full h-full">
                                                 <div
-                                                    className="relative flex items-center justify-center w-full h-6 font-bold text-center cursor-pointer select-none"
-                                                    onClick={() => isFilterable && toggleFilter(key)}
+                                                    className="relative flex items-center justify-center w-full h-6 font-bold text-center cursor-pointer select-none group/header"
+                                                    onClick={() => handleSort(key)}
                                                 >
-                                                    <span className="w-full px-4 truncate">{header}</span>
+                                                    <span className="truncate px-4">
+                                                        {header}
+                                                    </span>
+                                                    {/* 정렬 아이콘 */}
+                                                    {sortConfig.key === key && (
+                                                        <span className="ml-1">
+                                                            {sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3 inline" /> : <ArrowDown className="w-3 h-3 inline" />}
+                                                        </span>
+                                                    )}
+
+                                                    {/* 필터 아이콘 */}
                                                     {isFilterable && (
                                                         <div
-                                                            className="absolute right-0 top-1/2 transform -translate-y-1/2 p-1 flex items-center"
+                                                            className="absolute right-0 top-1/2 transform -translate-y-1/2 p-1 flex items-center hover:bg-gray-200 rounded"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 toggleFilter(key);
                                                             }}
+                                                            title="필터"
                                                         >
                                                             <Filter
                                                                 className={`w-3 h-3 hover:text-blue-600 transition-colors ${columnFilters[key] || visibleFilters.has(key) ? 'text-blue-600 fill-blue-100' : 'text-gray-400'}`}
