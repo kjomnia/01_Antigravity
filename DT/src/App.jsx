@@ -5,10 +5,11 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 import WireRegistrationManager from './components/WireRegistrationManager';
 import EquipmentWdmManager from './components/EquipmentWdmManager';
+import ScanPortManager from './components/ScanPortManager';
 import SettingsModal from './components/SettingsModal';
 import { initialOfficeData, initialRackData, initialEquipmentData } from './data/initialData';
 import { OFFICE_COLUMNS, RACK_COLUMNS, EQUIPMENT_COLUMNS } from './utils/excelUtils';
-import { LayoutGrid, Server, PenTool, Settings, ShieldCheck, Cable, Cpu, Cog } from 'lucide-react'; // [수정] 아이콘 추가
+import { LayoutGrid, Server, PenTool, Settings, ShieldCheck, Cable, Cpu, Cog, ScanLine } from 'lucide-react'; // [수정] 아이콘 추가
 
 // 로컬 스토리지 초기화 함수
 const loadFromStorage = (key, defaultValue = []) => {
@@ -241,6 +242,16 @@ const App = () => {
             QR바코드
           </button>
           <button
+            onClick={() => setActiveTab('scan')}
+            className={`
+              flex items-center gap-2 px-6 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+              ${activeTab === 'scan' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-300'}
+            `}
+          >
+            <ScanLine className="w-4 h-4" />
+            QR 스캔
+          </button>
+          <button
             onClick={() => setActiveTab('wire')}
             className={`
               flex items-center gap-2 px-6 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
@@ -292,6 +303,10 @@ const App = () => {
               setInputRows={setFieldInputRows}
               onReset={() => handleFullReset('field')}
             />
+          </div>
+
+          <div style={{ display: activeTab === 'scan' ? 'block' : 'none' }} className="h-full">
+            <ScanPortManager />
           </div>
 
           <div style={{ display: activeTab === 'wire' ? 'block' : 'none' }} className="h-full">
