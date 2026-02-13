@@ -654,6 +654,7 @@ const DataManager = ({ type, columns, title, data, setData }) => {
                             {type === 'rack' && (
                                 <ImageUploadField
                                     currentImage={newItem.imageFile}
+                                    modelId={newItem.modelId} // [신규] 모델 ID 전달
                                     onImageChange={(filename) => setNewItem(prev => ({ ...prev, imageFile: filename }))}
                                     electronAPI={window.electronAPI}
                                 />
@@ -683,7 +684,7 @@ const DataManager = ({ type, columns, title, data, setData }) => {
 };
 
 // [신규] 이미지 업로드 컴포넌트 (랙 모델 전용)
-const ImageUploadField = ({ currentImage, onImageChange, electronAPI }) => {
+const ImageUploadField = ({ currentImage, modelId, onImageChange, electronAPI }) => {
     const [preview, setPreview] = useState(null);
 
     useEffect(() => {
@@ -698,12 +699,21 @@ const ImageUploadField = ({ currentImage, onImageChange, electronAPI }) => {
         const file = e.target.files[0];
         if (!file || !electronAPI) return;
 
+        // [신규] 모델 ID 필수 체크
+        if (!modelId || modelId.trim() === '') {
+            alert("이미지를 등록하기 전에 '랙 모델 ID'를 먼저 입력해주세요.");
+            e.target.value = ''; // 파일 선택 초기화
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = async (e) => {
             const buffer = e.target.result;
-            // 파일명 고유화 (timestamp 추가)
+            // [신규] 파일명 = 모델ID + 확장자
             const ext = file.name.split('.').pop();
-            const filename = `rack_${new Date().getTime()}.${ext}`;
+            // 안전한 파일명을 위해 공백 제거나 특수문자 처리 필요할 수 있음
+            const safeModelId = modelId.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+            const filename = `${safeModelId}.${ext}`;
 
             try {
                 const result = await electronAPI.saveImage({ filename, buffer });
@@ -728,7 +738,13 @@ const ImageUploadField = ({ currentImage, onImageChange, electronAPI }) => {
             <div className="flex gap-4 items-start">
                 <div className="w-24 h-24 bg-gray-200 rounded flex items-center justify-center overflow-hidden border">
                     {preview ? (
-                        <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                        preview.startsWith('data:model/gltf-binary') ? (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-xs text-center p-1">
+                                <span className="font-bold text-indigo-600">3D Model<br />Ready</span>
+                            </div>
+                        ) : (
+                            <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                        )
                     ) : (
                         <span className="text-xs text-gray-400">No Image</span>
                     )}
@@ -736,7 +752,7 @@ const ImageUploadField = ({ currentImage, onImageChange, electronAPI }) => {
                 <div className="flex-1">
                     <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,.glb"
                         onChange={handleFileChange}
                         className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />

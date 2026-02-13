@@ -4,6 +4,7 @@ import { exportDataFile } from '../utils/excelUtils';
 import SearchableSelect from './SearchableSelect';
 import ConfirmModal from './ConfirmModal';
 import { matchKorean, convertKoreanToEnglish } from '../utils/koreanUtils';
+import RackModel3DViewer from './RackModel3DViewer';
 
 const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, setInputRows, onReset }) => {
     console.log(`[FieldInputManager] Rendering with ${inputRows?.length} rows`);
@@ -797,9 +798,17 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                                 <X className="w-6 h-6 text-gray-500" />
                             </button>
                         </div>
-                        <div className="p-4 overflow-auto flex-1 flex items-center justify-center bg-gray-100">
+                        <div className="p-4 overflow-auto flex-1 flex items-center justify-center bg-gray-100 w-full h-full">
                             {imagePreviewUrl ? (
-                                <img src={imagePreviewUrl} alt="Rack Model" className="max-w-full max-h-[70vh] object-contain shadow-md" />
+                                imagePreviewUrl.startsWith('data:model/gltf-binary') ? (
+                                    <div className="w-full h-[60vh]">
+                                        <React.Suspense fallback={<div>Loading 3D Viewer...</div>}>
+                                            <RackModel3DViewer modelUrl={imagePreviewUrl} />
+                                        </React.Suspense>
+                                    </div>
+                                ) : (
+                                    <img src={imagePreviewUrl} alt="Rack Model" className="max-w-full max-h-[70vh] object-contain shadow-md" />
+                                )
                             ) : (
                                 <div className="text-gray-400">이미지 로딩 중...</div>
                             )}

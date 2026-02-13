@@ -218,12 +218,35 @@ ipcMain.handle('read-image', async (event, filename) => {
             if (ext === '.png') mimeType = 'image/png';
             else if (ext === '.gif') mimeType = 'image/gif';
             else if (ext === '.webp') mimeType = 'image/webp';
+            else if (ext === '.glb') mimeType = 'model/gltf-binary';
 
             return { success: true, data: `data:${mimeType};base64,${base64}` };
         }
         return { success: false, message: 'Image not found' };
     } catch (error) {
         console.error('Read image error:', error);
+        return { success: false, message: error.message };
+    }
+});
+
+// [신규] IPC Handler for Scanning Images
+ipcMain.handle('scan-images', async () => {
+    try {
+        const imagesDir = getImagesDir();
+        if (!fs.existsSync(imagesDir)) {
+            return { success: true, files: [] };
+        }
+
+        const files = fs.readdirSync(imagesDir);
+        // 이미지 파일만 필터링 (확장자 기준)
+        const imageFiles = files.filter(file => {
+            const lower = file.toLowerCase();
+            return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.gif') || lower.endsWith('.webp') || lower.endsWith('.glb');
+        });
+
+        return { success: true, files: imageFiles };
+    } catch (error) {
+        console.error('Scan images error:', error);
         return { success: false, message: error.message };
     }
 });

@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveIni: (content) => ipcRenderer.invoke('save-ini-file', content),
     saveImage: (data) => ipcRenderer.invoke('save-image', data),
     readImage: (filename) => ipcRenderer.invoke('read-image', filename),
+    scanImages: () => ipcRenderer.invoke('scan-images'),
     focusWindow: () => ipcRenderer.send('focus-window'),
     isElectron: true
 });

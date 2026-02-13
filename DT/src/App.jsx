@@ -123,6 +123,61 @@ const App = () => {
     return () => clearTimeout(timer);
   }, [wdmInputRows]);
 
+  // [신규] 이미지 자동 스캔 및 연동
+  useEffect(() => {
+    const syncImages = async () => {
+      if (!window.electronAPI) return;
+
+      try {
+        const result = await window.electronAPI.scanImages();
+        if (result.success && result.files.length > 0) {
+          const imageMap = {};
+          result.files.forEach(file => {
+            // 확장자 제거한 이름을 키로 사용 (대문자 변환 없이 일단 원본 비교 또는 대문자 통일)
+            const nameWithoutExt = file.substring(0, file.lastIndexOf('.'));
+            imageMap[nameWithoutExt] = file;
+          });
+
+          setRackData(prevData => {
+            let hasChanges = false;
+            const newData = prevData.map(item => {
+              // 랙 모델 ID와 일치하는 이미지가 있는지 확인
+              // 파일명 규칙: {ModelID}.{ext}
+              // 대소문자 구분 없이 비교하거나, 정확히 일치하는지 확인
+              // 저장 시 safeModelId로 변환했으므로, 여기서도 같은 로직 적용 필요할 수 있음
+              // 하지만 사용자가 직접 넣은 파일도 있으므로 단순 비교 시도
+
+              const modelId = item.modelId;
+              if (!modelId) return item;
+
+              // 1. 정확히 일치하는 파일명 찾기
+              // 2. safeModelId 규칙으로 변환 후 찾기
+              const safeModelId = modelId.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+
+              const matchedFile = imageMap[modelId] || imageMap[safeModelId];
+
+              if (matchedFile) {
+                // 이미지가 발견되었고, 기존 정보와 다르다면 업데이트
+                if (item.imageFile !== matchedFile) {
+                  hasChanges = true;
+                  return { ...item, imageFile: matchedFile };
+                }
+              }
+
+              return item;
+            });
+
+            return hasChanges ? newData : prevData;
+          });
+        }
+      } catch (err) {
+        console.error("Image scan failed:", err);
+      }
+    };
+
+    syncImages();
+  }, []); // Mount 시 1회 실행 (데이터 로드 의존성 없음 - rackData는 초기값 혹은 로컬스토리지에서 옴)
+
   // [신규] 완전 초기화 핸들러 (강제 저장 및 키 변경)
   const handleFullReset = async (type) => {
     console.log(`[App] Full Reset triggered for: ${type}`);
