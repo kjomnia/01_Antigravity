@@ -270,3 +270,11 @@ ipcMain.on('focus-window', () => {
         mainWindow.show();
     }
 });
+
+// IPC Handler for getting ScanPort path
+ipcMain.handle('get-scanport-path', () => {
+    const scanPortPath = path.join(__dirname, 'dist/scanport.html');
+    console.log('Serving ScanPort path:', scanPortPath);
+    return scanPortPath;
+});
+

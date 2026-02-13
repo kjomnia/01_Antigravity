@@ -49,20 +49,57 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 :: 5. 매뉴얼 복사
-echo [5/6] 사용 설명서 복사 중... (manual.md -> Manual.txt)
+echo [5/8] 사용 설명서 복사 중... (manual.md -> Manual.txt)
 if exist manual.md (
     copy /y manual.md "release\dist\Manual.txt" > nul
 ) else (
     echo [WARNING] manual.md 파일을 찾을 수 없습니다. 배포 파일에서 제외됩니다.
 )
 
-:: 6. 압축
-echo [6/6] 최종 결과물 압축 중... (Digital Twin.zip)
+:: 6. img 폴더 복사
+echo [6/8] img 폴더 복사 중... (Application 폴더 안으로)
+if exist img (
+    xcopy /s /e /y img release\dist\Application\img\ > nul
+    echo [SUCCESS] img 폴더가 Application 폴더에 복사되었습니다.
+) else (
+    echo [WARNING] img 폴더를 찾을 수 없습니다.
+)
+
+:: 7. LGUPlusLabelPrinter 폴더 복사
+echo [7/8] LGUPlusLabelPrinter 폴더 복사 중...
+if exist LGUPlusLabelPrinter (
+    xcopy /s /e /y LGUPlusLabelPrinter release\dist\LGUPlusLabelPrinter\ > nul
+    echo [SUCCESS] LGUPlusLabelPrinter 폴더가 복사되었습니다.
+) else (
+    echo [WARNING] LGUPlusLabelPrinter 폴더를 찾을 수 없습니다.
+)
+
+:: 8. 압축
+echo [8/8] 최종 결과물 압축 중... (Digital Twin.zip)
 powershell "Compress-Archive -Path release\dist\* -DestinationPath 'release\Digital Twin.zip' -Force"
+
+:: 9. C:\02_Distribution 폴더로 복사
+echo [9/9] 배포 폴더로 복사 중... (C:\02_Distribution\Digital Twin)
+set DIST_DIR=C:\02_Distribution\Digital Twin
+if not exist "%DIST_DIR%" mkdir "%DIST_DIR%"
+
+:: 배포 파일 복사
+copy /y "release\Digital Twin.zip" "%DIST_DIR%\Digital Twin.zip" > nul
+if %ERRORLEVEL% EQU 0 (
+    echo [SUCCESS] 배포 파일이 %DIST_DIR%에 복사되었습니다.
+    
+    :: 복사 성공 시 release 폴더의 zip 파일 삭제
+    del /q "release\Digital Twin.zip" > nul
+    if %ERRORLEVEL% EQU 0 (
+        echo [INFO] release 폴더의 임시 파일이 삭제되었습니다.
+    )
+) else (
+    echo [WARNING] 배포 파일 복사 실패. 수동으로 복사해주세요.
+)
 
 echo.
 echo ========================================================
 echo 모든 작업이 완료되었습니다!
-echo 생성된 파일: release\Digital Twin.zip
+echo 배포 파일 위치: %DIST_DIR%\Digital Twin.zip
 echo ========================================================
 pause

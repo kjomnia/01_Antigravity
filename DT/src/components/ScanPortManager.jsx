@@ -1,18 +1,24 @@
 import React from 'react';
 
-const ScanPortManager = () => {
+export default function ScanPortManager() {
     return (
-        <div className="w-full h-full flex flex-col">
-            <h2 className="text-lg font-bold mb-4 px-4 pt-4">QR 스캔 포트</h2>
-            <div className="flex-1 w-full h-full bg-white border-t border-gray-200">
-                <iframe
-                    src="./scanport.html"
-                    className="w-full h-full border-none"
-                    title="QR Scan Port"
-                />
-            </div>
+        <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            overflow: 'auto'
+        }}>
+            <iframe
+                src="./scanport.html"
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none'
+                }}
+                title="QR Scan Port"
+            />
         </div>
     );
-};
-
-export default ScanPortManager;
+}
