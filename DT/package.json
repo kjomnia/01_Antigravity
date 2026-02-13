@@ -21,8 +21,7 @@
     "files": [
       "dist/**/*",
       "electron-main.cjs",
-      "electron-preload.cjs",
-      "LGUPlusLabelPrinter/**/*"
+      "electron-preload.cjs"
     ],
     "win": {
       "target": "nsis",
@@ -34,10 +33,7 @@
       "allowToChangeInstallationDirectory": true,
       "deleteAppDataOnUninstall": true
     },
-    "asar": true,
-    "asarUnpack": [
-      "LGUPlusLabelPrinter/**/*"
-    ]
+    "asar": true
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

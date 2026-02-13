@@ -14,7 +14,6 @@ export const OFFICE_COLUMNS = [
 export const RACK_COLUMNS = [
     { key: 'modelId', label: '랙 모델 ID', aliases: ['Rack Model ID', 'Rack Model Id'] },
     { key: 'code', label: '코드', aliases: ['열1', 'Column1', 'Code'] }, // '열1'도 허용
-    { key: 'modelName', label: '랙 모델 명', aliases: ['랙 모델명', 'Rack Model Name', 'Model Name'] },
     { key: 'ru', label: '랙 RU', aliases: ['Rack RU', 'RU'] },
     { key: 'height', label: '높이 (MM)', aliases: ['높이(MM)', '높이', 'Height'] },
     { key: 'width', label: '가로 (MM)', aliases: ['가로(MM)', '가로', 'Width'] },

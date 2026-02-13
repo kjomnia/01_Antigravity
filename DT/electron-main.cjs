@@ -107,19 +107,21 @@ ipcMain.handle('print-data', async (event, { type, officeName, rows }) => {
         const filePath = path.join(baseDir, fileName);
         XLSX.writeFile(wb, filePath);
 
+        XLSX.writeFile(wb, filePath);
+
         // Launch the Printer App
-        // When packaged, asarUnpack files are in 'app.asar.unpacked' folder
-        let printerDir = path.join(__dirname, 'LGUPlusLabelPrinter');
+        // [수정] 배포 시 Application 폴더와 같은 레벨에 있는 LGUPlusLabelPrinter 폴더를 참조하도록 변경
+        let printerDir;
+        if (app.isPackaged) {
+            // exe path: .../dist/Application/SmartStationManager.exe
+            // printer path: .../dist/LGUPlusLabelPrinter
+            printerDir = path.resolve(path.dirname(app.getPath('exe')), '../LGUPlusLabelPrinter');
+        } else {
+            printerDir = path.join(__dirname, 'LGUPlusLabelPrinter');
+        }
+
         let printerExePath = path.join(printerDir, 'LGUPlusLabelPrinter.exe');
 
-        // Robust path check for production (packed in ASAR)
-        if (printerExePath.includes('app.asar') && !printerExePath.includes('app.asar.unpacked')) {
-            const unpackedPath = printerExePath.replace('app.asar', 'app.asar.unpacked');
-            if (fs.existsSync(unpackedPath)) {
-                printerExePath = unpackedPath;
-                printerDir = printerDir.replace('app.asar', 'app.asar.unpacked');
-            }
-        }
 
         console.log('Final Printer Path:', printerExePath);
         console.log('Final Printer Dir (CWD):', printerDir);
@@ -143,10 +145,15 @@ ipcMain.handle('print-data', async (event, { type, officeName, rows }) => {
 // IPC Handler for Reading Env.Ini
 ipcMain.handle('read-ini-file', async () => {
     try {
-        let iniPath = path.join(__dirname, 'LGUPlusLabelPrinter', 'Env.Ini');
-        if (iniPath.includes('app.asar') && !iniPath.includes('app.asar.unpacked')) {
-            iniPath = iniPath.replace('app.asar', 'app.asar.unpacked');
+
+        let printerDir;
+        if (app.isPackaged) {
+            printerDir = path.resolve(path.dirname(app.getPath('exe')), '../LGUPlusLabelPrinter');
+        } else {
+            printerDir = path.join(__dirname, 'LGUPlusLabelPrinter');
         }
+        let iniPath = path.join(printerDir, 'Env.Ini');
+
 
         if (fs.existsSync(iniPath)) {
             const buffer = fs.readFileSync(iniPath);
@@ -162,10 +169,15 @@ ipcMain.handle('read-ini-file', async () => {
 // IPC Handler for Saving Env.Ini
 ipcMain.handle('save-ini-file', async (event, content) => {
     try {
-        let iniPath = path.join(__dirname, 'LGUPlusLabelPrinter', 'Env.Ini');
-        if (iniPath.includes('app.asar') && !iniPath.includes('app.asar.unpacked')) {
-            iniPath = iniPath.replace('app.asar', 'app.asar.unpacked');
+
+        let printerDir;
+        if (app.isPackaged) {
+            printerDir = path.resolve(path.dirname(app.getPath('exe')), '../LGUPlusLabelPrinter');
+        } else {
+            printerDir = path.join(__dirname, 'LGUPlusLabelPrinter');
         }
+        let iniPath = path.join(printerDir, 'Env.Ini');
+
 
         const buffer = iconv.encode(content, 'euc-kr');
         fs.writeFileSync(iniPath, buffer);

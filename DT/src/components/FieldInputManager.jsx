@@ -498,6 +498,7 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
 
         if (result.success) {
             alert(result.message);
+        } else {
             alert("출력 오류: " + result.message);
         }
     };
@@ -542,6 +543,7 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
             const result = await window.electronAPI.readImage(foundModelImage);
             if (result.success) {
                 setImagePreviewUrl(result.data);
+                setPreviewTitle(foundModelId); // [신규] 상단 조회 버튼 클릭 시에도 타이틀 설정
                 setIsImageModalOpen(true);
             } else {
                 // alert("이미지를 불러올 수 없습니다: " + result.message); // [수정] 포커스 문제로 alert 제거
@@ -567,11 +569,50 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
         const found = safeRackData.find(r => r && r.modelId === rackModelQr);
 
         if (found) {
-            return 'bg-green-100'; // 일치: 녹색
+            return 'bg-green-100 cursor-pointer hover:bg-green-200'; // 일치: 녹색 + 커서 포인터
         } else {
             return 'bg-red-100'; // 불일치: 빨강
         }
     };
+
+    // [신규] 그리드 내 랙 모델 QR 클릭 핸들러
+    const handleRowQrClick = async (qrCode) => {
+        if (!qrCode || !window.electronAPI) return;
+
+        // 유효한 QR인지 확인 (녹색 배경 조건과 동일)
+        const found = safeRackData.find(r => r && r.modelId === qrCode);
+        if (found && found.imageFile) {
+            try {
+                const result = await window.electronAPI.readImage(found.imageFile);
+                if (result.success) {
+                    setImagePreviewUrl(result.data);
+                    // 모달 제목에 모델 ID 표시를 위해 임시로 foundModelId 설정 (선택 사항)
+                    // 여기서는 모달 타이틀을 유연하게 처리하기 위해 foundModelId를 덮어쓰거나, 별도 상태를 쓸 수 있음.
+                    // 기존 로직 재활용: foundModelId가 상단 조회용이지만, 모달에서는 타이틀용으로 쓰임.
+                    // 다만 상단 검색 상태를 건드리지 않으려면 모달 내에서 보여줄 ID를 별도로 관리하는 게 좋음.
+                    // 현재 구조상 foundModelId를 모달 타이틀로 쓰고 있으므로, 
+                    // 단순하게 이미지 프리뷰 URL만 설정하고 모달을 열면, 타이틀은 상단 검색바의 것이 뜰 수 있음.
+                    // 따라서 모달 타이틀용 상태를 분리하거나, foundModelId를 잠시 변경해야 함.
+                    // 여기서는 간단히 foundModelId를 업데이트하지 않고, 모달 타이틀 표시 로직을 수정하는 방향이 좋겠으나,
+                    // 코드 최소 변경을 위해 foundModelId를 업데이트 하지 않고, 모달 UI에서 예외 처리하거나,
+                    // 별도 상태 'imageModalTitle'을 추가하는 것이 가장 깔끔함.
+                    // 하지만 이미 구현된 모달을 보면 `foundModelId`를 사용 중.
+                    // -> `foundModelId`를 변경하면 상단 검색바 상태도 바뀌어 혼란을 줄 수 있음.
+                    // -> `previewTitle` 상태 추가 결정.
+                    setPreviewTitle(found.modelId);
+                    setIsImageModalOpen(true);
+                } else {
+                    if (window.electronAPI.focusWindow) window.electronAPI.focusWindow();
+                }
+            } catch (err) {
+                console.error(err);
+                if (window.electronAPI.focusWindow) window.electronAPI.focusWindow();
+            }
+        }
+    };
+
+    // [신규] 이미지 모달 제목 상태
+    const [previewTitle, setPreviewTitle] = useState('');
 
     // [신규] 초기 로드 및 리셋(리마운트) 시 첫 번째 칸 포커스
     React.useEffect(() => {
@@ -691,7 +732,7 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                                     <td className="border p-0"><input id={`input-${idx}-w`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.w || ''} onChange={e => handleGridChange(idx, 'w', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'w')} onBlur={() => handleBlur(idx, 'w')} /></td>
                                     <td className="border p-0"><input id={`input-${idx}-d`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.d || ''} onChange={e => handleGridChange(idx, 'd', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'd')} onBlur={() => handleBlur(idx, 'd')} /></td>
                                     <td className="border p-0"><input id={`input-${idx}-rackIdQr`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.rackIdQr || ''} onChange={e => handleGridChange(idx, 'rackIdQr', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackIdQr')} /></td>
-                                    <td className="border p-0"><input id={`input-${idx}-rackModelQr`} autoComplete="off" className={`w-full h-full p-2 outline-none text-center ${getRackModelQrBgColor(row.rackModelQr)}`} value={row.rackModelQr || ''} onChange={e => handleGridChange(idx, 'rackModelQr', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackModelQr')} /></td>
+                                    <td className="border p-0"><input id={`input-${idx}-rackModelQr`} autoComplete="off" className={`w-full h-full p-2 outline-none text-center ${getRackModelQrBgColor(row.rackModelQr)}`} value={row.rackModelQr || ''} onClick={() => handleRowQrClick(row.rackModelQr)} onChange={e => handleGridChange(idx, 'rackModelQr', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackModelQr')} /></td>
                                     <td className="border p-0"><input id={`input-${idx}-rackLocQr`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.rackLocQr || ''} onChange={e => handleGridChange(idx, 'rackLocQr', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackLocQr')} /></td>
                                     <td className="border p-0"><input id={`input-${idx}-rackLoc`} autoComplete="off" className="w-full h-full p-2 outline-none bg-transparent text-center" value={row.rackLoc || ''} onChange={e => handleGridChange(idx, 'rackLoc', e.target.value)} onKeyDown={e => handleKeyDown(e, idx, 'rackLoc')} /></td>
                                 </tr>
@@ -793,7 +834,8 @@ const FieldInputManager = ({ officeData, rackData, equipmentData, inputRows, set
                 <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={handleCloseImageModal}>
                     <div className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl max-h-[90vh] flex flex-col relative" onClick={e => e.stopPropagation()}>
                         <div className="p-2 flex justify-between items-center border-b">
-                            <h3 className="font-bold text-gray-700 px-2">랙 모델 사진 ({foundModelId})</h3>
+                            {/* [수정] 모달 타이틀: previewTitle이 있으면 우선 사용, 없으면 foundModelId, 둘 다 없으면 기본값 */}
+                            <h3 className="font-bold text-gray-700 px-2">랙 모델 사진 ({previewTitle || foundModelId || 'Unknown'})</h3>
                             <button onClick={handleCloseImageModal} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
                                 <X className="w-6 h-6 text-gray-500" />
                             </button>

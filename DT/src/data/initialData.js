@@ -25900,15 +25900,7 @@ export const initialRackData = [
     "width": 1850,
     "depth": 750
   },
-  {
-    "modelId": "RM1-AH41W060D040",
-    "code": "AH",
-    "modelName": "RM1-AH41W060D040",
-    "ru": 1,
-    "height": 4100,
-    "width": 600,
-    "depth": 400
-  },
+
   {
     "modelId": "RM1-BH04W265D080",
     "code": "BH",
@@ -26503,33 +26495,8 @@ export const initialRackData = [
     "width": 2900,
     "depth": 1400
   },
-  {
-    "modelId": "RM1-BH10W565D040",
-    "code": "BH",
-    "modelName": "RM1-BH10W565D040",
-    "ru": 1,
-    "height": 1000,
-    "width": 5650,
-    "depth": 400
-  },
-  {
-    "modelId": "RM1-BH10W565D070",
-    "code": "BH",
-    "modelName": "RM1-BH10W565D070",
-    "ru": 1,
-    "height": 1000,
-    "width": 5650,
-    "depth": 700
-  },
-  {
-    "modelId": "RM1-BH10W570D070",
-    "code": "BH",
-    "modelName": "RM1-BH10W570D070",
-    "ru": 1,
-    "height": 1000,
-    "width": 5700,
-    "depth": 700
-  },
+
+
   {
     "modelId": "RM1-BH11W100D065",
     "code": "BH",
@@ -26710,15 +26677,7 @@ export const initialRackData = [
     "width": 2100,
     "depth": 850
   },
-  {
-    "modelId": "RM1-BH12W815D080",
-    "code": "BH",
-    "modelName": "RM1-BH12W815D080",
-    "ru": 1,
-    "height": 1200,
-    "width": 8150,
-    "depth": 800
-  },
+
   {
     "modelId": "RM1-BH13W055D040",
     "code": "BH",
@@ -28186,24 +28145,7 @@ export const initialRackData = [
     "width": 1100,
     "depth": 250
   },
-  {
-    "modelId": "RM1-DH60W050D020",
-    "code": "DH",
-    "modelName": "RM1-DH60W050D020",
-    "ru": 1,
-    "height": 6000,
-    "width": 500,
-    "depth": 200
-  },
-  {
-    "modelId": "RM1-DH95W065D025",
-    "code": "DH",
-    "modelName": "RM1-DH95W065D025",
-    "ru": 1,
-    "height": 9500,
-    "width": 650,
-    "depth": 250
-  },
+
   {
     "modelId": "RM1-FH04W065D070",
     "code": "FH",
@@ -28267,24 +28209,7 @@ export const initialRackData = [
     "width": 600,
     "depth": 600
   },
-  {
-    "modelId": "RM1-FH62W060D055",
-    "code": "FH",
-    "modelName": "RM1-FH62W060D055",
-    "ru": 1,
-    "height": 6200,
-    "width": 600,
-    "depth": 550
-  },
-  {
-    "modelId": "RM1-FH95W095D080",
-    "code": "FH",
-    "modelName": "RM1-FH95W095D080",
-    "ru": 1,
-    "height": 9500,
-    "width": 950,
-    "depth": 800
-  },
+
   {
     "modelId": "RM1-HH07W020D020",
     "code": "HH",
@@ -28609,15 +28534,7 @@ export const initialRackData = [
     "width": 1900,
     "depth": 400
   },
-  {
-    "modelId": "RM1-HH19W950D035",
-    "code": "HH",
-    "modelName": "RM1-HH19W950D035",
-    "ru": 1,
-    "height": 1900,
-    "width": 9500,
-    "depth": 350
-  },
+
   {
     "modelId": "RM1-HH20W065D045",
     "code": "HH",
@@ -28816,15 +28733,7 @@ export const initialRackData = [
     "width": 1800,
     "depth": 500
   },
-  {
-    "modelId": "RM1-HH43W065D045",
-    "code": "HH",
-    "modelName": "RM1-HH43W065D045",
-    "ru": 1,
-    "height": 4300,
-    "width": 650,
-    "depth": 450
-  },
+
   {
     "modelId": "RM1-OH05W040D020",
     "code": "OH",
@@ -29590,15 +29499,7 @@ export const initialRackData = [
     "width": 2200,
     "depth": 550
   },
-  {
-    "modelId": "RM1-OH50W060D050",
-    "code": "OH",
-    "modelName": "RM1-OH50W060D050",
-    "ru": 1,
-    "height": 5000,
-    "width": 600,
-    "depth": 500
-  },
+
   {
     "modelId": "RM1-PH05W040D010",
     "code": "PH",
@@ -29985,24 +29886,6 @@ export const initialRackData = [
     "height": 2200,
     "width": 600,
     "depth": 750
-  },
-  {
-    "modelId": "RM1-PH90W060D015",
-    "code": "PH",
-    "modelName": "RM1-PH90W060D015",
-    "ru": 1,
-    "height": 9000,
-    "width": 600,
-    "depth": 150
-  },
-  {
-    "modelId": "RM1-PH95W060D025",
-    "code": "PH",
-    "modelName": "RM1-PH95W060D025",
-    "ru": 1,
-    "height": 9500,
-    "width": 600,
-    "depth": 250
   },
   {
     "modelId": "RM1-QH03W020D010",
@@ -30948,15 +30831,6 @@ export const initialRackData = [
     "height": 1800,
     "width": 600,
     "depth": 250
-  },
-  {
-    "modelId": "RM1-SH70W045D035",
-    "code": "SH",
-    "modelName": "RM1-SH70W045D035",
-    "ru": 1,
-    "height": 7000,
-    "width": 450,
-    "depth": 350
   },
   {
     "modelId": "RM1-TU01W026D054",
@@ -32290,15 +32164,7 @@ export const initialRackData = [
     "width": 1300,
     "depth": 800
   },
-  {
-    "modelId": "RM1-TU42W600D080",
-    "code": "TU",
-    "modelName": "RM1-TU42W600D080",
-    "ru": 42,
-    "height": 1867,
-    "width": 6000,
-    "depth": 800
-  },
+
   {
     "modelId": "RM1-TU43W060D030",
     "code": "TU",
@@ -34837,15 +34703,7 @@ export const initialRackData = [
     "width": 1000,
     "depth": 250
   },
-  {
-    "modelId": "RM1-WH19W950D035",
-    "code": "WH",
-    "modelName": "RM1-WH19W950D035",
-    "ru": 1,
-    "height": 1900,
-    "width": 9500,
-    "depth": 350
-  },
+
   {
     "modelId": "RM1-WH20W015D055",
     "code": "WH",

@@ -335,6 +335,9 @@ const DataManager = ({ type, columns, title, data, setData }) => {
         const firstRow = data[0];
         Object.keys(firstRow).forEach(key => {
             if (key !== '_originalIdx' && !definedKeys.includes(key)) {
+                // [신규] 랙 모델인 경우 'modelName' 컬럼 강제 제외
+                if (type === 'rack' && key === 'modelName') return;
+
                 keys.push(key);
                 headers.push(key);
             }
