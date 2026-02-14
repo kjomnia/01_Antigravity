@@ -79,8 +79,8 @@ echo [8/8] 최종 결과물 압축 중... (Digital Twin.zip)
 powershell "Compress-Archive -Path release\dist\* -DestinationPath 'release\Digital Twin.zip' -Force"
 
 :: 9. C:\02_Distribution 폴더로 복사
-echo [9/9] 배포 폴더로 복사 중... (C:\02_Distribution\Digital Twin)
-set DIST_DIR=C:\02_Distribution\Digital Twin
+echo [9/9] 배포 폴더로 복사 중... (..\..\02_Distribution\Digital Twin)
+set DIST_DIR=..\..\02_Distribution\Digital Twin
 if not exist "%DIST_DIR%" mkdir "%DIST_DIR%"
 
 :: 배포 파일 복사
