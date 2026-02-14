@@ -1,0 +1,23 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.lguplus.smartstation.manager
+productName: SmartStationManager
+files:
+  - filter:
+      - dist/**/*
+      - electron-main.cjs
+      - electron-preload.cjs
+      - img/**/*
+      - LGUPlusLabelPrinter/**/*
+      - '!dist/**/*.map'
+win:
+  target: nsis
+  forceCodeSigning: false
+  compression: maximum
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: true
+asar: true
+electronVersion: 40.2.1
