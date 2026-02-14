@@ -5,1030 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>차량 물건 관리</title>
-    <style>
-        /* ==================== CSS Variables ==================== */
-        :root {
-            /* Colors */
-            --primary-color: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary-color: #ec4899;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --info-color: #3b82f6;
-
-            /* Neutrals */
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #f1f5f9;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-tertiary: #94a3b8;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-
-            /* Category Colors */
-            --cat-tools: #f59e0b;
-            --cat-emergency: #ef4444;
-            --cat-leisure: #3b82f6;
-            --cat-daily: #10b981;
-            --cat-other: #8b5cf6;
-
-            /* Spacing */
-            --spacing-xs: 0.25rem;
-            --spacing-sm: 0.5rem;
-            --spacing-md: 1rem;
-            --spacing-lg: 1.5rem;
-            --spacing-xl: 2rem;
-            --spacing-2xl: 3rem;
-
-            /* Border Radius */
-            --radius-sm: 0.375rem;
-            --radius-md: 0.5rem;
-            --radius-lg: 0.75rem;
-            --radius-xl: 1rem;
-            --radius-full: 9999px;
-
-            /* Transitions */
-            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-tertiary: #94a3b8;
-            --border-color: #334155;
-        }
-
-        /* ==================== Reset & Base ==================== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-            padding: var(--spacing-lg);
-        }
-
-        /* ==================== Container ==================== */
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: var(--bg-primary);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-xl);
-            overflow: hidden;
-        }
-
-        /* ==================== Header ==================== */
-        .header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            padding: var(--spacing-xl);
-            color: white;
-            position: relative;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: var(--spacing-sm);
-        }
-
-        .icon-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-base);
-            backdrop-filter: blur(10px);
-        }
-
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .search-filter-bar {
-            display: flex;
-            gap: var(--spacing-md);
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 250px;
-            position: relative;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 2.5rem;
-            border: none;
-            border-radius: var(--radius-lg);
-            background: rgba(255, 255, 255, 0.9);
-            font-size: 0.95rem;
-            transition: all var(--transition-base);
-        }
-
-        .search-box input:focus {
-            outline: none;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: var(--spacing-md);
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-        }
-
-        .filter-group {
-            display: flex;
-            gap: var(--spacing-sm);
-        }
-
-        .filter-btn {
-            padding: var(--spacing-md) var(--spacing-lg);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-radius: var(--radius-lg);
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all var(--transition-base);
-            backdrop-filter: blur(10px);
-        }
-
-        .filter-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .filter-btn.active {
-            background: white;
-            color: var(--primary-color);
-            border-color: white;
-        }
-
-        /* ==================== Main Content ==================== */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: var(--spacing-xl);
-            padding: var(--spacing-xl);
-        }
-
-        /* ==================== Car Layout ==================== */
-        .car-layout-section {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-xl);
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: var(--spacing-lg);
-            color: var(--text-primary);
-        }
-
-        .car-visual {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-lg);
-        }
-
-        .car-area {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            border: 2px solid var(--border-color);
-            transition: all var(--transition-base);
-            cursor: pointer;
-        }
-
-        .car-area:hover {
-            border-color: var(--primary-color);
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-
-        .car-area-title {
-            font-weight: 600;
-            margin-bottom: var(--spacing-md);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .item-count {
-            background: var(--primary-color);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: var(--radius-full);
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .backseat-areas {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-md);
-        }
-
-        .trunk-areas {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--spacing-md);
-        }
-
-        .location-zone {
-            background: var(--bg-secondary);
-            padding: var(--spacing-md);
-            border-radius: var(--radius-md);
-            text-align: center;
-            font-size: 0.9rem;
-            transition: all var(--transition-base);
-        }
-
-        .location-zone:hover {
-            background: var(--primary-light);
-            color: white;
-        }
-
-        /* ==================== Sidebar ==================== */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-lg);
-        }
-
-        .add-item-btn {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            border: none;
-            padding: var(--spacing-lg);
-            border-radius: var(--radius-lg);
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-base);
-            box-shadow: var(--shadow-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--spacing-sm);
-        }
-
-        .add-item-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .stats-card {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: var(--spacing-md) 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .stat-item:last-child {
-            border-bottom: none;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .stat-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        /* ==================== Items List ==================== */
-        .items-list {
-            display: grid;
-            gap: var(--spacing-md);
-        }
-
-        .item-card {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            border-left: 4px solid var(--primary-color);
-            box-shadow: var(--shadow-sm);
-            transition: all var(--transition-base);
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: var(--spacing-md);
-            align-items: center;
-        }
-
-        .item-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateX(4px);
-        }
-
-        .item-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
-            color: white;
-        }
-
-        .item-info {
-            flex: 1;
-        }
-
-        .item-name {
-            font-weight: 600;
-            font-size: 1.05rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .item-meta {
-            display: flex;
-            gap: var(--spacing-md);
-            flex-wrap: wrap;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .item-tag {
-            background: var(--bg-secondary);
-            padding: 0.25rem 0.5rem;
-            border-radius: var(--radius-sm);
-        }
-
-        .item-actions {
-            display: flex;
-            gap: var(--spacing-sm);
-        }
-
-        .btn-small {
-            padding: 0.5rem;
-            border: none;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .btn-small:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: var(--danger-color);
-        }
-
-        /* ==================== Modal ==================== */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn var(--transition-base);
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .modal-content {
-            background: var(--bg-primary);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-xl);
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-xl);
-            animation: slideUp var(--transition-base);
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: color var(--transition-fast);
-        }
-
-        .close-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .form-group {
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: var(--spacing-sm);
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: var(--spacing-md);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            transition: all var(--transition-base);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .location-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: var(--spacing-sm);
-        }
-
-        .location-option {
-            padding: var(--spacing-md);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            text-align: center;
-            transition: all var(--transition-base);
-            background: var(--bg-primary);
-        }
-
-        .location-option:hover {
-            border-color: var(--primary-color);
-            background: var(--bg-secondary);
-        }
-
-        .location-option.selected {
-            border-color: var(--primary-color);
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: var(--spacing-md);
-            margin-top: var(--spacing-xl);
-        }
-
-        .btn {
-            flex: 1;
-            padding: var(--spacing-md) var(--spacing-lg);
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-base);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-secondary {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-tertiary);
-        }
-
-        /* ==================== Empty State ==================== */
-        .empty-state {
-            text-align: center;
-            padding: var(--spacing-2xl);
-            color: var(--text-secondary);
-        }
-
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: var(--spacing-md);
-            opacity: 0.5;
-        }
-
-        /* ==================== Vehicle Selector ==================== */
-        .vehicle-selector {
-            position: relative;
-            min-width: 200px;
-            z-index: 300;
-        }
-
-        .vehicle-current {
-            background: rgba(255, 255, 255, 0.9);
-            padding: var(--spacing-md) var(--spacing-lg);
-            border-radius: var(--radius-lg);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            transition: all var(--transition-base);
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .vehicle-current:hover {
-            background: white;
-            box-shadow: var(--shadow-md);
-        }
-
-        .vehicle-dropdown {
-            display: none;
-            position: absolute;
-            top: calc(100% + var(--spacing-sm));
-            left: 0;
-            right: 0;
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-xl);
-            z-index: 200;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-        }
-
-        .vehicle-dropdown.active {
-            display: block;
-            animation: slideDown var(--transition-base);
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .vehicle-option {
-            padding: var(--spacing-md) var(--spacing-lg);
-            cursor: pointer;
-            transition: background var(--transition-fast);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            color: var(--text-primary);
-        }
-
-        .vehicle-option:hover {
-            background: var(--bg-secondary);
-        }
-
-        .vehicle-option.selected {
-            background: var(--primary-light);
-            color: white;
-        }
-
-        .vehicle-badge {
-            background: var(--warning-color);
-            color: white;
-            padding: 0.125rem 0.5rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .add-vehicle-option {
-            padding: var(--spacing-md) var(--spacing-lg);
-            cursor: pointer;
-            transition: background var(--transition-fast);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            color: var(--primary-color);
-            font-weight: 600;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .add-vehicle-option:hover {
-            background: var(--bg-secondary);
-        }
-
-        /* ==================== Vehicle Management ==================== */
-        .vehicle-card {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            border: 2px solid var(--border-color);
-            margin-bottom: var(--spacing-md);
-            transition: all var(--transition-base);
-        }
-
-        .vehicle-card:hover {
-            border-color: var(--primary-color);
-            box-shadow: var(--shadow-md);
-        }
-
-        .vehicle-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .vehicle-info h4 {
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .vehicle-meta {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .vehicle-actions {
-            display: flex;
-            gap: var(--spacing-sm);
-        }
-
-        .form-checkbox {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            margin-top: var(--spacing-md);
-        }
-
-        .form-checkbox input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        /* ==================== Vehicle Image View ==================== */
-        .vehicle-image-section {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .image-upload-area {
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-xl);
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition-base);
-            background: var(--bg-secondary);
-        }
-
-        .image-upload-area:hover {
-            border-color: var(--primary-color);
-            background: var(--bg-tertiary);
-        }
-
-        .image-upload-area.has-image {
-            padding: 0;
-            border: none;
-            cursor: default;
-        }
-
-        .vehicle-image-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .vehicle-image-container img {
-            width: 100%;
-            height: auto;
-            border-radius: var(--radius-lg);
-            display: block;
-        }
-
-        .location-markers {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .location-marker {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            pointer-events: all;
-            cursor: pointer;
-            transition: all var(--transition-base);
-        }
-
-        .marker-badge {
-            background: var(--primary-color);
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1rem;
-            box-shadow: var(--shadow-lg);
-            border: 3px solid white;
-        }
-
-        .location-marker:hover .marker-badge {
-            transform: scale(1.2);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .marker-badge.empty {
-            background: var(--text-tertiary);
-            opacity: 0.5;
-        }
-
-        .marker-badge.highlight {
-            background: #ff6b6b;
-            animation: pulse 1.5s ease-in-out infinite;
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
-            transform: scale(1.3);
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
-            }
-
-            50% {
-                box-shadow: 0 0 30px rgba(255, 107, 107, 1);
-            }
-        }
-
-        .location-marker.highlight {
-            z-index: 100;
-        }
-
-        .marker-popup {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-primary);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-md);
-            box-shadow: var(--shadow-xl);
-            min-width: 200px;
-            margin-bottom: var(--spacing-sm);
-            display: none;
-            z-index: 1000;
-            border: 1px solid var(--border-color);
-        }
-
-        .location-marker:hover .marker-popup {
-            display: block;
-        }
-
-        .marker-popup::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 8px solid transparent;
-            border-top-color: var(--bg-primary);
-        }
-
-        .popup-title {
-            font-weight: 600;
-            margin-bottom: var(--spacing-sm);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-        }
-
-        .popup-items {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .popup-item {
-            padding: var(--spacing-xs) 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .popup-item:last-child {
-            border-bottom: none;
-        }
-
-        .image-actions {
-            display: flex;
-            gap: var(--spacing-sm);
-            justify-content: center;
-            margin-top: var(--spacing-md);
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-md);
-            opacity: 0.5;
-        }
-
-        .upload-text {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        /* ==================== Responsive ==================== */
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                order: -1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 0;
-            }
-
-            .app-container {
-                border-radius: 0;
-            }
-
-            .header {
-                padding: var(--spacing-lg);
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            .main-content {
-                padding: var(--spacing-lg);
-            }
-
-            .trunk-areas {
-                grid-template-columns: 1fr;
-            }
-
-            .backseat-areas {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="./src/style.css">
 </head>
 
 <body>
@@ -1037,22 +14,51 @@
         <header class="header">
             <div class="header-content">
                 <div class="header-top">
-                    <h1>
+                    <h1 onclick="switchView('layout')" style="cursor: pointer;">
                         🚗 차량 물건 관리
                     </h1>
                     <div class="header-actions">
-                        <button class="icon-btn" onclick="openVehicleManagement()" title="차량 관리">
-                            ⚙️
-                        </button>
-                        <button class="icon-btn" onclick="toggleTheme()" title="테마 전환">
-                            🌙
-                        </button>
-                        <button class="icon-btn" onclick="exportData()" title="데이터 내보내기">
-                            📥
-                        </button>
-                        <button class="icon-btn" onclick="importData()" title="데이터 가져오기">
-                            📤
-                        </button>
+                        <div class="menu-container">
+                            <button class="icon-btn" onclick="toggleMainMenu()" title="메뉴">
+                                ☰
+                            </button>
+                            <div class="main-menu-dropdown" id="mainMenuDropdown">
+                                <div class="menu-section">
+                                    <div class="menu-label">보기 모드</div>
+                                    <div class="menu-item active" onclick="switchView('layout')">
+                                        <span>🗺️</span> 장비 위치 확인
+                                    </div>
+                                    <div class="menu-item" onclick="switchView('list')">
+                                        <span>📋</span> 물건 목록
+                                    </div>
+                                    <div class="menu-item" onclick="switchView('stats')">
+                                        <span>📊</span> 통계
+                                    </div>
+                                    <div class="menu-item" onclick="switchView('zones')">
+                                        <span>🏗️</span> 구역별 현황
+                                    </div>
+                                    <div class="menu-item" onclick="switchView('category')">
+                                        <span>️</span> 카테고리별
+                                    </div>
+                                </div>
+                                <div class="menu-separator"></div>
+                                <div class="menu-section">
+                                    <div class="menu-label">설정 및 관리</div>
+                                    <div class="menu-item" onclick="openVehicleManagement()">
+                                        <span>⚙️</span> 차량 관리
+                                    </div>
+                                    <div class="menu-item" onclick="toggleTheme()">
+                                        <span>🌙</span> 테마 전환
+                                    </div>
+                                    <div class="menu-item" onclick="exportData()">
+                                        <span>📥</span> 데이터 내보내기
+                                    </div>
+                                    <div class="menu-item" onclick="importData()">
+                                        <span>📤</span> 데이터 가져오기
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1067,176 +73,198 @@
                             <!-- Vehicle options will be populated here -->
                         </div>
                     </div>
+
+                    <div class="filter-group">
+                        <div class="filter-selector">
+                            <div class="filter-current" onclick="toggleFilterDropdown()">
+                                <span id="currentFilterName">전체</span>
+                                <span style="margin-left: auto;">▼</span>
+                            </div>
+                            <div class="filter-dropdown" id="filterDropdown">
+                                <div class="filter-option selected" onclick="selectFilter('all')">전체</div>
+                                <div class="filter-option" onclick="selectFilter('frontseat')">앞자리</div>
+                                <div class="filter-option" onclick="selectFilter('backseat')">뒷자리</div>
+                                <div class="filter-option" onclick="selectFilter('trunk')">트렁크</div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="search-box">
                         <span class="search-icon">🔍</span>
                         <input type="text" id="searchInput" placeholder="물건 검색..." oninput="filterItems()">
-                    </div>
-                    <div class="filter-group">
-                        <button class="filter-btn active" onclick="filterByLocation('all')">전체</button>
-                        <button class="filter-btn" onclick="filterByLocation('backseat')">뒷자리</button>
-                        <button class="filter-btn" onclick="filterByLocation('trunk')">트렁크</button>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- Main Content -->
+        <!-- Main Content (Views) -->
         <main class="main-content">
-            <!-- Vehicle Image View -->
-            <section class="vehicle-image-section" id="vehicleImageSection">
-                <h2 class="section-title">📸 차량 위치 확인</h2>
-                <div class="vehicle-image-container" id="vehicleImageContainer">
-                    <!-- Default SVG Car Image -->
-                    <svg id="vehicleImage" viewBox="0 0 300 550"
-                        style="width: 100%; max-width: 600px; height: auto; display: block; margin: 0 auto;">
-                        <!-- Car Body -->
-                        <rect x="50" y="50" width="200" height="450" rx="40" fill="none" stroke="#9b59b6"
-                            stroke-width="3" />
-
-                        <!-- Front (Hood) -->
-                        <ellipse cx="150" cy="60" rx="60" ry="20" fill="none" stroke="#9b59b6" stroke-width="2" />
-
-                        <!-- Windshield -->
-                        <path d="M 80 110 Q 150 95 220 110" fill="none" stroke="#9b59b6" stroke-width="2" />
-
-                        <!-- Front Seat Area -->
-                        <rect x="60" y="120" width="180" height="90" rx="5" fill="rgba(155, 89, 182, 0.05)"
-                            stroke="#9b59b6" stroke-width="1" stroke-dasharray="5,5" />
-                        <text x="150" y="170" text-anchor="middle" fill="#9b59b6" font-size="14"
-                            font-weight="600">앞자리</text>
-
-                        <!-- Middle Divider -->
-                        <line x1="70" y1="220" x2="230" y2="220" stroke="#9b59b6" stroke-width="1"
-                            stroke-dasharray="3,3" />
-
-                        <!-- Backseat Area -->
-                        <rect x="60" y="230" width="180" height="100" rx="5" fill="rgba(155, 89, 182, 0.05)"
-                            stroke="#9b59b6" stroke-width="1" stroke-dasharray="5,5" />
-                        <text x="150" y="285" text-anchor="middle" fill="#9b59b6" font-size="14"
-                            font-weight="600">뒷자리</text>
-
-                        <!-- Trunk Divider -->
-                        <line x1="70" y1="340" x2="230" y2="340" stroke="#9b59b6" stroke-width="1"
-                            stroke-dasharray="3,3" />
-
-                        <!-- Trunk Area -->
-                        <rect x="60" y="350" width="180" height="120" rx="5" fill="rgba(155, 89, 182, 0.05)"
-                            stroke="#9b59b6" stroke-width="1" stroke-dasharray="5,5" />
-                        <text x="150" y="415" text-anchor="middle" fill="#9b59b6" font-size="14"
-                            font-weight="600">트렁크</text>
-
-                        <!-- Side Mirrors -->
-                        <ellipse cx="35" cy="150" rx="15" ry="10" fill="none" stroke="#9b59b6" stroke-width="2" />
-                        <ellipse cx="265" cy="150" rx="15" ry="10" fill="none" stroke="#9b59b6" stroke-width="2" />
-
-                        <!-- Wheels -->
-                        <circle cx="70" cy="130" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
-                        <circle cx="230" cy="130" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
-                        <circle cx="70" cy="450" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
-                        <circle cx="230" cy="450" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
-
-                        <!-- Rear -->
-                        <path d="M 80 490 Q 150 500 220 490" fill="none" stroke="#9b59b6" stroke-width="2" />
-                    </svg>
-                    <div class="location-markers" id="locationMarkers">
-                        <!-- Markers will be dynamically generated -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- Car Layout Visualization -->
-            <section class="car-layout-section">
-                <h2 class="section-title">차량 레이아웃</h2>
-                <div class="car-visual">
-                    <!-- Front Seat -->
-                    <div class="car-area">
-                        <div class="car-area-title">
-                            <span>🚗 앞자리</span>
-                            <span class="item-count" id="frontseatCount">0</span>
-                        </div>
-                        <div class="backseat-areas">
-                            <div class="location-zone" onclick="filterByLocation('frontseat-left')">
-                                운전석<br><small id="count-frontseat-left">0개</small>
-                            </div>
-                            <div class="location-zone" onclick="filterByLocation('frontseat-right')">
-                                조수석<br><small id="count-frontseat-right">0개</small>
-                            </div>
+            <!-- View: Vehicle Layout -->
+            <div id="view-layout" class="view-container active">
+                <!-- Vehicle Image Section -->
+                <section class="vehicle-image-section" id="vehicleImageSection">
+                    <h2 class="section-title">📸 장비 위치 확인</h2>
+                    <div class="vehicle-image-container" id="vehicleImageContainer">
+                        <!-- Default SVG Car Image -->
+                        <svg id="vehicleImage" viewBox="0 0 300 550"
+                            style="width: 100%; max-width: 600px; height: auto; display: block; margin: 0 auto;">
+                            <!-- Car Body -->
+                            <rect x="50" y="50" width="200" height="450" rx="40" fill="none" stroke="#9b59b6"
+                                stroke-width="3" />
+                            <!-- Front (Hood) -->
+                            <ellipse cx="150" cy="60" rx="60" ry="20" fill="none" stroke="#9b59b6" stroke-width="2" />
+                            <!-- Windshield -->
+                            <path d="M 80 110 Q 150 95 220 110" fill="none" stroke="#9b59b6" stroke-width="2" />
+                            <!-- Front Seat Group -->
+                            <g class="clickable-zone" onclick="navigateToZone('frontseat')" style="cursor: pointer;">
+                                <rect x="60" y="120" width="180" height="90" rx="5" fill="rgba(155, 89, 182, 0.05)"
+                                    stroke="#9b59b6" stroke-width="1" stroke-dasharray="5,5" />
+                                <text x="150" y="170" text-anchor="middle" fill="#9b59b6" font-size="14"
+                                    font-weight="600">앞자리</text>
+                            </g>
+                            <!-- Middle Divider -->
+                            <line x1="70" y1="220" x2="230" y2="220" stroke="#9b59b6" stroke-width="1"
+                                stroke-dasharray="3,3" />
+                            <!-- Backseat Group -->
+                            <g class="clickable-zone" onclick="navigateToZone('backseat')" style="cursor: pointer;">
+                                <rect x="60" y="230" width="180" height="100" rx="5" fill="rgba(155, 89, 182, 0.05)"
+                                    stroke="#9b59b6" stroke-width="1" stroke-dasharray="5,5" />
+                                <text x="150" y="285" text-anchor="middle" fill="#9b59b6" font-size="14"
+                                    font-weight="600">뒷자리</text>
+                            </g>
+                            <!-- Trunk Divider -->
+                            <line x1="70" y1="340" x2="230" y2="340" stroke="#9b59b6" stroke-width="1"
+                                stroke-dasharray="3,3" />
+                            <!-- Trunk Group -->
+                            <g class="clickable-zone" onclick="navigateToZone('trunk')" style="cursor: pointer;">
+                                <rect x="60" y="350" width="180" height="120" rx="5" fill="rgba(155, 89, 182, 0.05)"
+                                    stroke="#9b59b6" stroke-width="1" stroke-dasharray="5,5" />
+                                <text x="150" y="415" text-anchor="middle" fill="#9b59b6" font-size="14"
+                                    font-weight="600">트렁크</text>
+                            </g>
+                            <!-- Side Mirrors -->
+                            <ellipse cx="35" cy="150" rx="15" ry="10" fill="none" stroke="#9b59b6" stroke-width="2" />
+                            <ellipse cx="265" cy="150" rx="15" ry="10" fill="none" stroke="#9b59b6" stroke-width="2" />
+                            <!-- Wheels -->
+                            <circle cx="70" cy="130" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
+                            <circle cx="230" cy="130" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
+                            <circle cx="70" cy="450" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
+                            <circle cx="230" cy="450" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
+                            <!-- Rear -->
+                            <path d="M 80 490 Q 150 500 220 490" fill="none" stroke="#9b59b6" stroke-width="2" />
+                        </svg>
+                        <div class="location-markers" id="locationMarkers">
+                            <!-- Markers will be dynamically generated -->
                         </div>
                     </div>
-
-                    <!-- Backseat -->
-                    <div class="car-area">
-                        <div class="car-area-title">
-                            <span>🪑 뒷자리</span>
-                            <span class="item-count" id="backseatCount">0</span>
-                        </div>
-                        <div class="backseat-areas">
-                            <div class="location-zone" onclick="filterByLocation('backseat-left')">
-                                좌측<br><small id="count-backseat-left">0개</small>
-                            </div>
-                            <div class="location-zone" onclick="filterByLocation('backseat-right')">
-                                우측<br><small id="count-backseat-right">0개</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Trunk -->
-                    <div class="car-area">
-                        <div class="car-area-title">
-                            <span>📦 트렁크</span>
-                            <span class="item-count" id="trunkCount">0</span>
-                        </div>
-                        <div class="trunk-areas">
-                            <div class="location-zone" onclick="filterByLocation('trunk-left')">
-                                좌측<br><small id="count-trunk-left">0개</small>
-                            </div>
-                            <div class="location-zone" onclick="filterByLocation('trunk-center')">
-                                중앙<br><small id="count-trunk-center">0개</small>
-                            </div>
-                            <div class="location-zone" onclick="filterByLocation('trunk-right')">
-                                우측<br><small id="count-trunk-right">0개</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Items List -->
-            <div style="margin-top: var(--spacing-xl);">
-                <h2 class="section-title">물건 목록</h2>
-                <div class="items-list" id="itemsList">
-                    <div class="empty-state">
-                        <div class="empty-icon">📦</div>
-                        <p>등록된 물건이 없습니다.<br>새 물건을 추가해보세요!</p>
-                    </div>
-                </div>
+                </section>
             </div>
-        </main>
 
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <button class="add-item-btn" onclick="openModal()">
+            <!-- View: Zone Status -->
+            <div id="view-zones" class="view-container">
+                <section class="car-layout-section">
+                    <h2 class="section-title">구역별 현황</h2>
+                    <div class="car-visual">
+                        <div class="car-area">
+                            <div class="car-area-title">
+                                <span>🚗 앞자리</span>
+                                <span class="item-count" id="frontseatCount">0</span>
+                            </div>
+                            <div class="backseat-areas">
+                                <div class="location-zone" onclick="filterByLocation('frontseat-left')">
+                                    운전석<br><small id="count-frontseat-left">0개</small>
+                                </div>
+                                <div class="location-zone" onclick="filterByLocation('frontseat-right')">
+                                    조수석<br><small id="count-frontseat-right">0개</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="car-area">
+                            <div class="car-area-title">
+                                <span>🪑 뒷자리</span>
+                                <span class="item-count" id="backseatCount">0</span>
+                            </div>
+                            <div class="backseat-areas">
+                                <div class="location-zone" onclick="filterByLocation('backseat-left')">
+                                    좌측<br><small id="count-backseat-left">0개</small>
+                                </div>
+                                <div class="location-zone" onclick="filterByLocation('backseat-right')">
+                                    우측<br><small id="count-backseat-right">0개</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="car-area">
+                            <div class="car-area-title">
+                                <span>📦 트렁크</span>
+                                <span class="item-count" id="trunkCount">0</span>
+                            </div>
+                            <div class="trunk-areas">
+                                <div class="location-zone" onclick="filterByLocation('trunk-left')">
+                                    좌측<br><small id="count-trunk-left">0개</small>
+                                </div>
+                                <div class="location-zone" onclick="filterByLocation('trunk-center')">
+                                    중앙<br><small id="count-trunk-center">0개</small>
+                                </div>
+                                <div class="location-zone" onclick="filterByLocation('trunk-right')">
+                                    우측<br><small id="count-trunk-right">0개</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+    </div>
+
+    <!-- View: Items List -->
+    <div id="view-list" class="view-container">
+        <div class="view-header">
+            <h2 class="section-title">물건 목록</h2>
+            <button class="add-item-btn" onclick="openModal()"
+                style="padding: var(--spacing-sm) var(--spacing-lg); font-size: 1rem;">
                 ➕ 물건 추가
             </button>
-
-            <div class="stats-card">
-                <h3 class="section-title">통계</h3>
-                <div class="stat-item">
-                    <span class="stat-label">총 물건 수</span>
-                    <span class="stat-value" id="totalItems">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">카테고리 수</span>
-                    <span class="stat-value" id="totalCategories">0</span>
-                </div>
+        </div>
+        <div class="items-list" id="itemsList">
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <p>등록된 물건이 없습니다.<br>새 물건을 추가해보세요!</p>
             </div>
+        </div>
+    </div>
 
-            <div class="stats-card">
-                <h3 class="section-title">카테고리별</h3>
-                <div id="categoryStats"></div>
+    <!-- View: Stats -->
+    <div id="view-stats" class="view-container">
+        <div class="stats-card">
+            <h3 class="section-title">통계</h3>
+            <div class="stat-item">
+                <span class="stat-label">총 물건 수</span>
+                <span class="stat-value" id="totalItems">0</span>
             </div>
-        </aside>
-        </main>
+            <div class="stat-item">
+                <span class="stat-label">카테고리 수</span>
+                <span class="stat-value" id="totalCategories">0</span>
+            </div>
+        </div>
+
+        <div class="stats-card" style="margin-top: var(--spacing-lg);">
+            <h3 class="section-title">카테고리별</h3>
+            <div id="categoryStats"></div>
+        </div>
+    </div>
+
+    <!-- View: By Category -->
+    <div id="view-category" class="view-container">
+        <div class="view-header">
+            <h2 class="section-title">카테고리별 보기</h2>
+            <button class="add-item-btn" onclick="openModal()"
+                style="padding: var(--spacing-sm) var(--spacing-lg); font-size: 1rem;">
+                ➕ 물건 추가
+            </button>
+        </div>
+        <div id="categoryViewContainer">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+    </main>
     </div>
 
     <!-- Modal -->
@@ -1368,856 +396,16 @@
     </div>
 
     <!-- Hidden file input for import -->
-    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="handleFileImport(event)">
+    <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileImport(event)">
+
+    <!-- SheetJS Library -->
+    <script src="./src/lib/xlsx.full.min.js"></script>
 
     <!-- Hidden file input for vehicle image -->
     <input type="file" id="vehicleImageInput" accept="image/jpeg,image/png,image/jpg" style="display: none;"
         onchange="handleVehicleImageUpload(event)">
 
-    <script>
-        // ==================== Data Management ====================
-        let vehicles = [];
-        let currentVehicleId = null;
-        let vehicleData = {};
-        let currentEditId = null;
-        let currentEditVehicleId = null;
-        let currentFilter = 'all';
-
-        // Get current vehicle's items
-        function getCurrentItems() {
-            if (!currentVehicleId || !vehicleData[currentVehicleId]) {
-                return [];
-            }
-            return vehicleData[currentVehicleId].items || [];
-        }
-
-        // Set current vehicle's items
-        function setCurrentItems(items) {
-            if (!currentVehicleId) return;
-            if (!vehicleData[currentVehicleId]) {
-                vehicleData[currentVehicleId] = { items: [] };
-            }
-            vehicleData[currentVehicleId].items = items;
-        }
-
-        // Data migration from old format
-        function migrateData() {
-            const oldData = localStorage.getItem('carStorageData');
-            const newData = localStorage.getItem('carStorageDataV2');
-
-            if (oldData && !newData) {
-                // Migrate old data to new format
-                const items = JSON.parse(oldData);
-                const defaultVehicle = {
-                    id: 'default-vehicle',
-                    plateNumber: '기본 차량',
-                    name: '내 차',
-                    type: '',
-                    isDefault: true,
-                    createdAt: new Date().toISOString()
-                };
-
-                const migratedData = {
-                    vehicles: [defaultVehicle],
-                    vehicleData: {
-                        'default-vehicle': { items: items }
-                    }
-                };
-
-                localStorage.setItem('carStorageDataV2', JSON.stringify(migratedData));
-                localStorage.setItem('carStorageData_backup', oldData);
-                localStorage.removeItem('carStorageData');
-
-                console.log('Data migrated from old format');
-            }
-        }
-
-        // Load data from localStorage
-        function loadData() {
-            migrateData();
-
-            const saved = localStorage.getItem('carStorageDataV2');
-            if (saved) {
-                const data = JSON.parse(saved);
-                vehicles = data.vehicles || [];
-                vehicleData = data.vehicleData || {};
-            }
-
-            // If no vehicles, create default
-            if (vehicles.length === 0) {
-                const defaultVehicle = {
-                    id: 'default-vehicle',
-                    plateNumber: '기본 차량',
-                    name: '내 차',
-                    type: '',
-                    isDefault: true,
-                    createdAt: new Date().toISOString()
-                };
-                vehicles.push(defaultVehicle);
-                vehicleData['default-vehicle'] = { items: [] };
-            }
-
-            // Set current vehicle to default or first
-            const defaultVehicle = vehicles.find(v => v.isDefault);
-            currentVehicleId = defaultVehicle ? defaultVehicle.id : vehicles[0].id;
-
-            updateVehicleSelector();
-            renderItems();
-            updateStats();
-            renderVehicleImage();
-        }
-
-        // Save data to localStorage
-        function saveData() {
-            const data = {
-                vehicles: vehicles,
-                vehicleData: vehicleData
-            };
-            localStorage.setItem('carStorageDataV2', JSON.stringify(data));
-        }
-
-        // ==================== Vehicle Management ====================
-        function updateVehicleSelector() {
-            const currentVehicle = vehicles.find(v => v.id === currentVehicleId);
-            const displayName = currentVehicle ? (currentVehicle.name || currentVehicle.plateNumber) : '차량 선택';
-            document.getElementById('currentVehicleName').textContent = displayName;
-
-            renderVehicleDropdown();
-        }
-
-        function renderVehicleDropdown() {
-            const dropdown = document.getElementById('vehicleDropdown');
-
-            const vehicleOptions = vehicles.map(vehicle => {
-                const isSelected = vehicle.id === currentVehicleId;
-                const itemCount = vehicleData[vehicle.id] ? (vehicleData[vehicle.id].items || []).length : 0;
-                return `
-                    <div class="vehicle-option ${isSelected ? 'selected' : ''}" onclick="switchVehicle('${vehicle.id}')">
-                        <span>🚗</span>
-                        <span>${vehicle.name || vehicle.plateNumber}</span>
-                        ${vehicle.isDefault ? '<span class="vehicle-badge">기본</span>' : ''}
-                        <span style="margin-left: auto; font-size: 0.85rem; color: var(--text-secondary);">${itemCount}개</span>
-                    </div>
-                `;
-            }).join('');
-
-            dropdown.innerHTML = vehicleOptions + `
-                <div class="add-vehicle-option" onclick="openVehicleModal(); toggleVehicleDropdown();">
-                    <span>➕</span>
-                    <span>새 차량 추가</span>
-                </div>
-            `;
-        }
-
-        function toggleVehicleDropdown() {
-            const dropdown = document.getElementById('vehicleDropdown');
-            dropdown.classList.toggle('active');
-
-            // Close dropdown when clicking outside
-            if (dropdown.classList.contains('active')) {
-                setTimeout(() => {
-                    document.addEventListener('click', closeDropdownOutside);
-                }, 0);
-            } else {
-                document.removeEventListener('click', closeDropdownOutside);
-            }
-        }
-
-        function closeDropdownOutside(e) {
-            const dropdown = document.getElementById('vehicleDropdown');
-            const selector = document.querySelector('.vehicle-selector');
-
-            if (!selector.contains(e.target)) {
-                dropdown.classList.remove('active');
-                document.removeEventListener('click', closeDropdownOutside);
-            }
-        }
-
-        function switchVehicle(vehicleId) {
-            currentVehicleId = vehicleId;
-            updateVehicleSelector();
-            renderItems();
-            updateStats();
-            renderVehicleImage();
-            toggleVehicleDropdown();
-        }
-
-        function openVehicleManagement() {
-            renderVehiclesList();
-            document.getElementById('vehicleManagementModal').classList.add('active');
-        }
-
-        function closeVehicleManagement() {
-            document.getElementById('vehicleManagementModal').classList.remove('active');
-        }
-
-        function renderVehiclesList() {
-            const container = document.getElementById('vehiclesList');
-
-            if (vehicles.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>등록된 차량이 없습니다.</p></div>';
-                return;
-            }
-
-            container.innerHTML = vehicles.map(vehicle => {
-                const itemCount = vehicleData[vehicle.id] ? (vehicleData[vehicle.id].items || []).length : 0;
-                return `
-                    <div class="vehicle-card">
-                        <div class="vehicle-card-header">
-                            <div class="vehicle-info">
-                                <h4>
-                                    🚗 ${vehicle.plateNumber}
-                                    ${vehicle.isDefault ? '<span class="vehicle-badge">기본</span>' : ''}
-                                </h4>
-                                <div class="vehicle-meta">
-                                    ${vehicle.name ? `${vehicle.name}` : ''}
-                                    ${vehicle.type ? ` · ${vehicle.type}` : ''}
-                                    · ${itemCount}개 물건
-                                </div>
-                            </div>
-                            <div class="vehicle-actions">
-                                <button class="btn-small" onclick="openVehicleModal('${vehicle.id}')" title="수정">✏️</button>
-                                <button class="btn-small btn-danger" onclick="deleteVehicle('${vehicle.id}')" title="삭제">🗑️</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function openVehicleModal(vehicleId = null) {
-            const modal = document.getElementById('vehicleModal');
-            const form = document.getElementById('vehicleForm');
-            const title = document.getElementById('vehicleModalTitle');
-
-            if (vehicleId) {
-                // Edit mode
-                currentEditVehicleId = vehicleId;
-                const vehicle = vehicles.find(v => v.id === vehicleId);
-                title.textContent = '차량 수정';
-                document.getElementById('vehiclePlateNumber').value = vehicle.plateNumber;
-                document.getElementById('vehicleName').value = vehicle.name || '';
-                document.getElementById('vehicleType').value = vehicle.type || '';
-                document.getElementById('vehicleIsDefault').checked = vehicle.isDefault || false;
-            } else {
-                // Add mode
-                currentEditVehicleId = null;
-                title.textContent = '차량 추가';
-                form.reset();
-            }
-
-            modal.classList.add('active');
-        }
-
-        function closeVehicleModal() {
-            document.getElementById('vehicleModal').classList.remove('active');
-            currentEditVehicleId = null;
-        }
-
-        function saveVehicle(event) {
-            event.preventDefault();
-
-            const isDefault = document.getElementById('vehicleIsDefault').checked;
-
-            // If setting as default, remove default from others
-            if (isDefault) {
-                vehicles.forEach(v => v.isDefault = false);
-            }
-
-            const vehicleData_new = {
-                id: currentEditVehicleId || `vehicle-${Date.now()}`,
-                plateNumber: document.getElementById('vehiclePlateNumber').value,
-                name: document.getElementById('vehicleName').value,
-                type: document.getElementById('vehicleType').value,
-                isDefault: isDefault,
-                createdAt: currentEditVehicleId ? vehicles.find(v => v.id === currentEditVehicleId).createdAt : new Date().toISOString()
-            };
-
-            if (currentEditVehicleId) {
-                // Update existing vehicle
-                const index = vehicles.findIndex(v => v.id === currentEditVehicleId);
-                vehicles[index] = vehicleData_new;
-            } else {
-                // Add new vehicle
-                vehicles.push(vehicleData_new);
-                vehicleData[vehicleData_new.id] = { items: [] };
-            }
-
-            saveData();
-            renderVehiclesList();
-            updateVehicleSelector();
-            closeVehicleModal();
-        }
-
-        function deleteVehicle(vehicleId) {
-            if (vehicles.length === 1) {
-                alert('최소 1개의 차량은 필요합니다.');
-                return;
-            }
-
-            const vehicle = vehicles.find(v => v.id === vehicleId);
-            const itemCount = vehicleData[vehicleId] ? (vehicleData[vehicleId].items || []).length : 0;
-
-            if (!confirm(`"${vehicle.plateNumber}" 차량과 ${itemCount}개의 물건을 삭제하시겠습니까?`)) {
-                return;
-            }
-
-            vehicles = vehicles.filter(v => v.id !== vehicleId);
-            delete vehicleData[vehicleId];
-
-            // If deleted current vehicle, switch to first
-            if (currentVehicleId === vehicleId) {
-                currentVehicleId = vehicles[0].id;
-                updateVehicleSelector();
-                renderItems();
-                updateStats();
-            }
-
-            saveData();
-            renderVehiclesList();
-        }
-
-        // ==================== Modal Management ====================
-        function openModal(id = null) {
-            const modal = document.getElementById('itemModal');
-            const form = document.getElementById('itemForm');
-            const title = document.getElementById('modalTitle');
-
-            const items = getCurrentItems();
-
-            if (id) {
-                // Edit mode
-                currentEditId = id;
-                const item = items.find(i => i.id === id);
-                title.textContent = '물건 수정';
-                document.getElementById('itemName').value = item.name;
-                document.getElementById('itemCategory').value = item.category;
-                document.getElementById('itemLocation').value = item.location;
-                document.getElementById('itemQuantity').value = item.quantity;
-                document.getElementById('itemMemo').value = item.memo || '';
-
-                // Highlight selected location
-                document.querySelectorAll('.location-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-                const locationMap = {
-                    'backseat-left': 0,
-                    'backseat-right': 1,
-                    'trunk-left': 2,
-                    'trunk-center': 3,
-                    'trunk-right': 4
-                };
-                document.querySelectorAll('.location-option')[locationMap[item.location]].classList.add('selected');
-            } else {
-                // Add mode
-                currentEditId = null;
-                title.textContent = '물건 추가';
-                form.reset();
-                document.querySelectorAll('.location-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-            }
-
-            modal.classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('itemModal').classList.remove('active');
-            currentEditId = null;
-        }
-
-        function selectLocation(location) {
-            document.getElementById('itemLocation').value = location;
-            document.querySelectorAll('.location-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            event.target.classList.add('selected');
-        }
-
-        // ==================== CRUD Operations ====================
-        function saveItem(event) {
-            event.preventDefault();
-
-            let items = getCurrentItems();
-
-            const itemData = {
-                id: currentEditId || Date.now().toString(),
-                name: document.getElementById('itemName').value,
-                category: document.getElementById('itemCategory').value,
-                location: document.getElementById('itemLocation').value,
-                quantity: parseInt(document.getElementById('itemQuantity').value),
-                memo: document.getElementById('itemMemo').value,
-                createdAt: currentEditId ? items.find(i => i.id === currentEditId).createdAt : new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-
-            if (currentEditId) {
-                // Update existing item
-                const index = items.findIndex(i => i.id === currentEditId);
-                items[index] = itemData;
-            } else {
-                // Add new item
-                items.push(itemData);
-            }
-
-            setCurrentItems(items);
-            saveData();
-            renderItems();
-            updateStats();
-            renderVehicleImage();
-            closeModal();
-        }
-
-        function deleteItem(id) {
-            if (confirm('이 물건을 삭제하시겠습니까?')) {
-                let items = getCurrentItems();
-                items = items.filter(i => i.id !== id);
-                setCurrentItems(items);
-                saveData();
-                renderItems();
-                updateStats();
-                renderVehicleImage();
-            }
-        }
-
-        // ==================== Rendering ====================
-        function renderItems() {
-            const container = document.getElementById('itemsList');
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const items = getCurrentItems();
-
-            let filteredItems = items.filter(item => {
-                const matchesSearch = item.name.toLowerCase().includes(searchTerm) ||
-                    item.category.toLowerCase().includes(searchTerm) ||
-                    (item.memo && item.memo.toLowerCase().includes(searchTerm));
-
-                if (currentFilter === 'all') return matchesSearch;
-                if (currentFilter === 'frontseat') return matchesSearch && item.location.startsWith('frontseat');
-                if (currentFilter === 'backseat') return matchesSearch && item.location.startsWith('backseat');
-                if (currentFilter === 'trunk') return matchesSearch && item.location.startsWith('trunk');
-                return matchesSearch && item.location === currentFilter;
-            });
-
-            if (filteredItems.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📦</div>
-                        <p>${searchTerm || currentFilter !== 'all' ? '검색 결과가 없습니다.' : '등록된 물건이 없습니다.<br>새 물건을 추가해보세요!'}</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const categoryIcons = {
-                '공구': '🔧',
-                '비상용품': '🚨',
-                '레저용품': '⚽',
-                '생활용품': '🏠',
-                '기타': '📌'
-            };
-
-            const locationNames = {
-                'backseat-left': '뒷자리 좌측',
-                'backseat-right': '뒷자리 우측',
-                'trunk-left': '트렁크 좌측',
-                'trunk-center': '트렁크 중앙',
-                'trunk-right': '트렁크 우측'
-            };
-
-            container.innerHTML = filteredItems.map(item => `
-                <div class="item-card">
-                    <div class="item-icon">${categoryIcons[item.category] || '📦'}</div>
-                    <div class="item-info">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-meta">
-                            <span class="item-tag">${item.category}</span>
-                            <span class="item-tag">📍 ${locationNames[item.location]}</span>
-                            <span class="item-tag">×${item.quantity}</span>
-                        </div>
-                        ${item.memo ? `<div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">${item.memo}</div>` : ''}
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn-small" onclick="openModal('${item.id}')" title="수정">✏️</button>
-                        <button class="btn-small btn-danger" onclick="deleteItem('${item.id}')" title="삭제">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-
-            // Highlight locations on vehicle image if search is active
-            if (searchTerm) {
-                highlightSearchLocations(filteredItems);
-            } else {
-                clearLocationHighlights();
-            }
-        }
-
-        function updateStats() {
-            const items = getCurrentItems();
-
-            // Total items
-            document.getElementById('totalItems').textContent = items.length;
-
-            // Count by location
-            const frontseatLeft = items.filter(i => i.location === 'frontseat-left').length;
-            const frontseatRight = items.filter(i => i.location === 'frontseat-right').length;
-            const backseatLeft = items.filter(i => i.location === 'backseat-left').length;
-            const backseatRight = items.filter(i => i.location === 'backseat-right').length;
-            const trunkLeft = items.filter(i => i.location === 'trunk-left').length;
-            const trunkCenter = items.filter(i => i.location === 'trunk-center').length;
-            const trunkRight = items.filter(i => i.location === 'trunk-right').length;
-
-            // Update individual counts
-            const updateCount = (id, count) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = `${count}개`;
-            };
-
-            updateCount('count-frontseat-left', frontseatLeft);
-            updateCount('count-frontseat-right', frontseatRight);
-            updateCount('count-backseat-left', backseatLeft);
-            updateCount('count-backseat-right', backseatRight);
-            updateCount('count-trunk-left', trunkLeft);
-            updateCount('count-trunk-center', trunkCenter);
-            updateCount('count-trunk-right', trunkRight);
-
-            // Update area totals
-            document.getElementById('frontseatCount').textContent = frontseatLeft + frontseatRight;
-            document.getElementById('backseatCount').textContent = backseatLeft + backseatRight;
-            document.getElementById('trunkCount').textContent = trunkLeft + trunkCenter + trunkRight;
-
-            // Category stats
-            const categories = {};
-            items.forEach(item => {
-                categories[item.category] = (categories[item.category] || 0) + 1;
-            });
-
-            document.getElementById('totalCategories').textContent = Object.keys(categories).length;
-
-            const categoryIcons = {
-                '공구': '🔧',
-                '비상용품': '🚨',
-                '레저용품': '⚽',
-                '생활용품': '🏠',
-                '기타': '📌'
-            };
-
-            const categoryStatsHtml = Object.entries(categories).map(([cat, count]) => `
-                <div class="stat-item">
-                    <span class="stat-label">${categoryIcons[cat]} ${cat}</span>
-                    <span class="stat-value">${count}</span>
-                </div>
-            `).join('');
-
-            document.getElementById('categoryStats').innerHTML = categoryStatsHtml ||
-                '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">데이터 없음</div>';
-        }
-
-        // ==================== Filtering ====================
-        function filterItems() {
-            renderItems();
-        }
-
-        function filterByLocation(location) {
-            currentFilter = location;
-
-            // Update button states
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            renderItems();
-        }
-
-        // ==================== Import/Export ====================
-        function exportData() {
-            const data = {
-                vehicles: vehicles,
-                vehicleData: vehicleData
-            };
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `car-storage-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function importData() {
-            document.getElementById('fileInput').click();
-        }
-
-        function handleFileImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-
-                    // Check if new format
-                    if (imported.vehicles && imported.vehicleData) {
-                        if (confirm(`${imported.vehicles.length}개의 차량 데이터를 가져오시겠습니까? 기존 데이터는 유지됩니다.`)) {
-                            // Merge vehicles
-                            imported.vehicles.forEach(v => {
-                                v.id = `vehicle-${Date.now()}-${Math.random()}`;
-                                v.isDefault = false;
-                                vehicles.push(v);
-                            });
-
-                            // Merge vehicle data
-                            Object.keys(imported.vehicleData).forEach((oldId, index) => {
-                                const newId = vehicles[vehicles.length - imported.vehicles.length + index].id;
-                                vehicleData[newId] = imported.vehicleData[oldId];
-                            });
-
-                            saveData();
-                            updateVehicleSelector();
-                            renderItems();
-                            updateStats();
-                        }
-                    } else if (Array.isArray(imported)) {
-                        // Old format - add to current vehicle
-                        if (confirm(`${imported.length}개의 물건을 현재 차량에 추가하시겠습니까?`)) {
-                            let items = getCurrentItems();
-                            items = [...items, ...imported];
-                            setCurrentItems(items);
-                            saveData();
-                            renderItems();
-                            updateStats();
-                        }
-                    }
-                } catch (error) {
-                    alert('파일을 읽는 중 오류가 발생했습니다.');
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        }
-
-        // ==================== Vehicle Image Management ====================
-        // Location coordinates (percentage based for SVG)
-        const locationCoordinates = {
-            'frontseat-left': { x: 35, y: 30 },
-            'frontseat-right': { x: 65, y: 30 },
-            'backseat-left': { x: 35, y: 52 },
-            'backseat-right': { x: 65, y: 52 },
-            'trunk-left': { x: 30, y: 76 },
-            'trunk-center': { x: 50, y: 76 },
-            'trunk-right': { x: 70, y: 76 }
-        };
-
-        function triggerImageUpload() {
-            document.getElementById('vehicleImageInput').click();
-        }
-
-        function handleVehicleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Check file type
-            if (!file.type.match('image/(jpeg|jpg|png)')) {
-                alert('JPG 또는 PNG 파일만 업로드 가능합니다.');
-                return;
-            }
-
-            // Check file size (2MB limit)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('파일 크기는 2MB 이하여야 합니다.');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const currentVehicle = vehicles.find(v => v.id === currentVehicleId);
-                if (currentVehicle) {
-                    currentVehicle.vehicleImage = e.target.result;
-                    saveData();
-                    renderVehicleImage();
-                }
-            };
-            reader.readAsDataURL(file);
-            event.target.value = '';
-        }
-
-        function renderVehicleImage() {
-            // Always render markers since we have a default SVG image
-            renderLocationMarkers();
-        }
-
-        function renderLocationMarkers() {
-            const markersContainer = document.getElementById('locationMarkers');
-            const items = getCurrentItems();
-
-            // Count items per location
-            const locationCounts = {};
-            items.forEach(item => {
-                locationCounts[item.location] = (locationCounts[item.location] || 0) + 1;
-            });
-
-            const locationNames = {
-                'frontseat-left': '앞자리 운전석',
-                'frontseat-right': '앞자리 조수석',
-                'backseat-left': '뒷자리 좌측',
-                'backseat-right': '뒷자리 우측',
-                'trunk-left': '트렁크 좌측',
-                'trunk-center': '트렁크 중앙',
-                'trunk-right': '트렁크 우측'
-            };
-
-            // Generate markers
-            const markersHtml = Object.keys(locationCoordinates).map(location => {
-                const coords = locationCoordinates[location];
-                const count = locationCounts[location] || 0;
-                const locationItems = items.filter(item => item.location === location);
-
-                const categoryIcons = {
-                    '공구': '🔧',
-                    '비상용품': '🚨',
-                    '레저용품': '⚽',
-                    '생활용품': '🏠',
-                    '기타': '📌'
-                };
-
-                const popupContent = locationItems.length > 0 ? `
-                    <div class="marker-popup">
-                        <div class="popup-title">${locationNames[location]}</div>
-                        <div class="popup-items">
-                            ${locationItems.map(item => `
-                                <div class="popup-item">
-                                    ${categoryIcons[item.category] || '📦'} ${item.name} ×${item.quantity}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : `
-                    <div class="marker-popup">
-                        <div class="popup-title">${locationNames[location]}</div>
-                        <div class="popup-items">물건 없음</div>
-                    </div>
-                `;
-
-                return `
-                    <div class="location-marker" style="left: ${coords.x}%; top: ${coords.y}%;">
-                        <div class="marker-badge ${count === 0 ? 'empty' : ''}">${count}</div>
-                        ${popupContent}
-                    </div>
-                `;
-            }).join('');
-
-            markersContainer.innerHTML = markersHtml;
-        }
-
-        function removeVehicleImage() {
-            if (!confirm('차량 이미지를 삭제하시겠습니까?')) {
-                return;
-            }
-
-            const currentVehicle = vehicles.find(v => v.id === currentVehicleId);
-            if (currentVehicle) {
-                delete currentVehicle.vehicleImage;
-                saveData();
-                renderVehicleImage();
-            }
-        }
-
-        // ==================== Search Location Highlight ====================
-        function highlightSearchLocations(filteredItems) {
-            // Get unique locations from filtered items
-            const searchLocations = [...new Set(filteredItems.map(item => item.location))];
-
-            // Clear previous highlights
-            clearLocationHighlights();
-
-            // Add highlight class to matching markers
-            searchLocations.forEach(location => {
-                const markers = document.querySelectorAll('.location-marker');
-                markers.forEach(marker => {
-                    const markerStyle = marker.style.cssText;
-                    const coords = locationCoordinates[location];
-                    if (coords && markerStyle.includes(`left: ${coords.x}%`) && markerStyle.includes(`top: ${coords.y}%`)) {
-                        marker.classList.add('highlight');
-                        const badge = marker.querySelector('.marker-badge');
-                        if (badge) {
-                            badge.classList.add('highlight');
-                        }
-                    }
-                });
-            });
-
-            // Auto-scroll to vehicle image section if there are matches
-            if (searchLocations.length > 0) {
-                scrollToVehicleImage();
-            }
-        }
-
-        function clearLocationHighlights() {
-            const markers = document.querySelectorAll('.location-marker');
-            markers.forEach(marker => {
-                marker.classList.remove('highlight');
-                const badge = marker.querySelector('.marker-badge');
-                if (badge) {
-                    badge.classList.remove('highlight');
-                }
-            });
-        }
-
-        function scrollToVehicleImage() {
-            const imageSection = document.getElementById('vehicleImageSection');
-
-            // Always scroll to vehicle image section
-            if (imageSection) {
-                setTimeout(() => {
-                    imageSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
-            }
-        }
-
-        // ==================== Theme ====================
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-
-            event.target.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        }
-
-        // Load theme preference
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        }
-
-        // ==================== Initialize ====================
-        document.addEventListener('DOMContentLoaded', function () {
-            loadTheme();
-            loadData();
-        });
-
-        // Close modals on outside click
-        document.getElementById('itemModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        document.getElementById('vehicleManagementModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeVehicleManagement();
-            }
-        });
-
-        document.getElementById('vehicleModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeVehicleModal();
-            }
-        });
-    </script>
+    <script src="./src/app.js"></script>
 
 </body>
 
