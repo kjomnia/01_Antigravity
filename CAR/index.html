@@ -811,6 +811,183 @@
             cursor: pointer;
         }
 
+        /* ==================== Vehicle Image View ==================== */
+        .vehicle-image-section {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .image-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            background: var(--bg-secondary);
+        }
+
+        .image-upload-area:hover {
+            border-color: var(--primary-color);
+            background: var(--bg-tertiary);
+        }
+
+        .image-upload-area.has-image {
+            padding: 0;
+            border: none;
+            cursor: default;
+        }
+
+        .vehicle-image-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .vehicle-image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: var(--radius-lg);
+            display: block;
+        }
+
+        .location-markers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .location-marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: all;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .marker-badge {
+            background: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: var(--shadow-lg);
+            border: 3px solid white;
+        }
+
+        .location-marker:hover .marker-badge {
+            transform: scale(1.2);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .marker-badge.empty {
+            background: var(--text-tertiary);
+            opacity: 0.5;
+        }
+
+        .marker-badge.highlight {
+            background: #ff6b6b;
+            animation: pulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            transform: scale(1.3);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(255, 107, 107, 1);
+            }
+        }
+
+        .location-marker.highlight {
+            z-index: 100;
+        }
+
+        .marker-popup {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-xl);
+            min-width: 200px;
+            margin-bottom: var(--spacing-sm);
+            display: none;
+            z-index: 1000;
+            border: 1px solid var(--border-color);
+        }
+
+        .location-marker:hover .marker-popup {
+            display: block;
+        }
+
+        .marker-popup::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: var(--bg-primary);
+        }
+
+        .popup-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .popup-items {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .popup-item {
+            padding: var(--spacing-xs) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .popup-item:last-child {
+            border-bottom: none;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            margin-top: var(--spacing-md);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
         /* ==================== Responsive ==================== */
         @media (max-width: 1024px) {
             .main-content {
@@ -905,10 +1082,88 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Vehicle Image View -->
+            <section class="vehicle-image-section" id="vehicleImageSection">
+                <h2 class="section-title">📸 차량 위치 확인</h2>
+                <div class="vehicle-image-container" id="vehicleImageContainer">
+                    <!-- Default SVG Car Image -->
+                    <svg id="vehicleImage" viewBox="0 0 300 550"
+                        style="width: 100%; max-width: 600px; height: auto; display: block; margin: 0 auto;">
+                        <!-- Car Body -->
+                        <rect x="50" y="50" width="200" height="450" rx="40" fill="none" stroke="#9b59b6"
+                            stroke-width="3" />
+
+                        <!-- Front (Hood) -->
+                        <ellipse cx="150" cy="60" rx="60" ry="20" fill="none" stroke="#9b59b6" stroke-width="2" />
+
+                        <!-- Windshield -->
+                        <path d="M 80 110 Q 150 95 220 110" fill="none" stroke="#9b59b6" stroke-width="2" />
+
+                        <!-- Front Seat Area -->
+                        <rect x="60" y="120" width="180" height="90" rx="5" fill="rgba(155, 89, 182, 0.05)"
+                            stroke="#9b59b6" stroke-width="1" stroke-dasharray="5,5" />
+                        <text x="150" y="170" text-anchor="middle" fill="#9b59b6" font-size="14"
+                            font-weight="600">앞자리</text>
+
+                        <!-- Middle Divider -->
+                        <line x1="70" y1="220" x2="230" y2="220" stroke="#9b59b6" stroke-width="1"
+                            stroke-dasharray="3,3" />
+
+                        <!-- Backseat Area -->
+                        <rect x="60" y="230" width="180" height="100" rx="5" fill="rgba(155, 89, 182, 0.05)"
+                            stroke="#9b59b6" stroke-width="1" stroke-dasharray="5,5" />
+                        <text x="150" y="285" text-anchor="middle" fill="#9b59b6" font-size="14"
+                            font-weight="600">뒷자리</text>
+
+                        <!-- Trunk Divider -->
+                        <line x1="70" y1="340" x2="230" y2="340" stroke="#9b59b6" stroke-width="1"
+                            stroke-dasharray="3,3" />
+
+                        <!-- Trunk Area -->
+                        <rect x="60" y="350" width="180" height="120" rx="5" fill="rgba(155, 89, 182, 0.05)"
+                            stroke="#9b59b6" stroke-width="1" stroke-dasharray="5,5" />
+                        <text x="150" y="415" text-anchor="middle" fill="#9b59b6" font-size="14"
+                            font-weight="600">트렁크</text>
+
+                        <!-- Side Mirrors -->
+                        <ellipse cx="35" cy="150" rx="15" ry="10" fill="none" stroke="#9b59b6" stroke-width="2" />
+                        <ellipse cx="265" cy="150" rx="15" ry="10" fill="none" stroke="#9b59b6" stroke-width="2" />
+
+                        <!-- Wheels -->
+                        <circle cx="70" cy="130" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
+                        <circle cx="230" cy="130" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
+                        <circle cx="70" cy="450" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
+                        <circle cx="230" cy="450" r="20" fill="none" stroke="#9b59b6" stroke-width="3" />
+
+                        <!-- Rear -->
+                        <path d="M 80 490 Q 150 500 220 490" fill="none" stroke="#9b59b6" stroke-width="2" />
+                    </svg>
+                    <div class="location-markers" id="locationMarkers">
+                        <!-- Markers will be dynamically generated -->
+                    </div>
+                </div>
+            </section>
+
             <!-- Car Layout Visualization -->
             <section class="car-layout-section">
                 <h2 class="section-title">차량 레이아웃</h2>
                 <div class="car-visual">
+                    <!-- Front Seat -->
+                    <div class="car-area">
+                        <div class="car-area-title">
+                            <span>🚗 앞자리</span>
+                            <span class="item-count" id="frontseatCount">0</span>
+                        </div>
+                        <div class="backseat-areas">
+                            <div class="location-zone" onclick="filterByLocation('frontseat-left')">
+                                운전석<br><small id="count-frontseat-left">0개</small>
+                            </div>
+                            <div class="location-zone" onclick="filterByLocation('frontseat-right')">
+                                조수석<br><small id="count-frontseat-right">0개</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Backseat -->
                     <div class="car-area">
                         <div class="car-area-title">
@@ -944,42 +1199,43 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Items List -->
-                <div style="margin-top: var(--spacing-xl);">
-                    <h2 class="section-title">물건 목록</h2>
-                    <div class="items-list" id="itemsList">
-                        <div class="empty-state">
-                            <div class="empty-icon">📦</div>
-                            <p>등록된 물건이 없습니다.<br>새 물건을 추가해보세요!</p>
-                        </div>
-                    </div>
-                </div>
             </section>
 
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <button class="add-item-btn" onclick="openModal()">
-                    ➕ 물건 추가
-                </button>
-
-                <div class="stats-card">
-                    <h3 class="section-title">통계</h3>
-                    <div class="stat-item">
-                        <span class="stat-label">총 물건 수</span>
-                        <span class="stat-value" id="totalItems">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">카테고리 수</span>
-                        <span class="stat-value" id="totalCategories">0</span>
+            <!-- Items List -->
+            <div style="margin-top: var(--spacing-xl);">
+                <h2 class="section-title">물건 목록</h2>
+                <div class="items-list" id="itemsList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📦</div>
+                        <p>등록된 물건이 없습니다.<br>새 물건을 추가해보세요!</p>
                     </div>
                 </div>
+            </div>
+        </main>
 
-                <div class="stats-card">
-                    <h3 class="section-title">카테고리별</h3>
-                    <div id="categoryStats"></div>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <button class="add-item-btn" onclick="openModal()">
+                ➕ 물건 추가
+            </button>
+
+            <div class="stats-card">
+                <h3 class="section-title">통계</h3>
+                <div class="stat-item">
+                    <span class="stat-label">총 물건 수</span>
+                    <span class="stat-value" id="totalItems">0</span>
                 </div>
-            </aside>
+                <div class="stat-item">
+                    <span class="stat-label">카테고리 수</span>
+                    <span class="stat-value" id="totalCategories">0</span>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <h3 class="section-title">카테고리별</h3>
+                <div id="categoryStats"></div>
+            </div>
+        </aside>
         </main>
     </div>
 
@@ -1011,6 +1267,12 @@
                 <div class="form-group">
                     <label class="form-label">위치 *</label>
                     <div class="location-grid">
+                        <div class="location-option" onclick="selectLocation('frontseat-left')">
+                            🚗 앞자리 운전석
+                        </div>
+                        <div class="location-option" onclick="selectLocation('frontseat-right')">
+                            🚗 앞자리 조수석
+                        </div>
                         <div class="location-option" onclick="selectLocation('backseat-left')">
                             🪑 뒷자리 좌측
                         </div>
@@ -1108,6 +1370,10 @@
     <!-- Hidden file input for import -->
     <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="handleFileImport(event)">
 
+    <!-- Hidden file input for vehicle image -->
+    <input type="file" id="vehicleImageInput" accept="image/jpeg,image/png,image/jpg" style="display: none;"
+        onchange="handleVehicleImageUpload(event)">
+
     <script>
         // ==================== Data Management ====================
         let vehicles = [];
@@ -1198,6 +1464,7 @@
             updateVehicleSelector();
             renderItems();
             updateStats();
+            renderVehicleImage();
         }
 
         // Save data to localStorage
@@ -1271,6 +1538,7 @@
             updateVehicleSelector();
             renderItems();
             updateStats();
+            renderVehicleImage();
             toggleVehicleDropdown();
         }
 
@@ -1496,6 +1764,7 @@
             saveData();
             renderItems();
             updateStats();
+            renderVehicleImage();
             closeModal();
         }
 
@@ -1507,6 +1776,7 @@
                 saveData();
                 renderItems();
                 updateStats();
+                renderVehicleImage();
             }
         }
 
@@ -1522,6 +1792,7 @@
                     (item.memo && item.memo.toLowerCase().includes(searchTerm));
 
                 if (currentFilter === 'all') return matchesSearch;
+                if (currentFilter === 'frontseat') return matchesSearch && item.location.startsWith('frontseat');
                 if (currentFilter === 'backseat') return matchesSearch && item.location.startsWith('backseat');
                 if (currentFilter === 'trunk') return matchesSearch && item.location.startsWith('trunk');
                 return matchesSearch && item.location === currentFilter;
@@ -1571,6 +1842,13 @@
                     </div>
                 </div>
             `).join('');
+
+            // Highlight locations on vehicle image if search is active
+            if (searchTerm) {
+                highlightSearchLocations(filteredItems);
+            } else {
+                clearLocationHighlights();
+            }
         }
 
         function updateStats() {
@@ -1579,28 +1857,33 @@
             // Total items
             document.getElementById('totalItems').textContent = items.length;
 
-            // Location counts
-            const locationCounts = {
-                'backseat-left': 0,
-                'backseat-right': 0,
-                'trunk-left': 0,
-                'trunk-center': 0,
-                'trunk-right': 0
+            // Count by location
+            const frontseatLeft = items.filter(i => i.location === 'frontseat-left').length;
+            const frontseatRight = items.filter(i => i.location === 'frontseat-right').length;
+            const backseatLeft = items.filter(i => i.location === 'backseat-left').length;
+            const backseatRight = items.filter(i => i.location === 'backseat-right').length;
+            const trunkLeft = items.filter(i => i.location === 'trunk-left').length;
+            const trunkCenter = items.filter(i => i.location === 'trunk-center').length;
+            const trunkRight = items.filter(i => i.location === 'trunk-right').length;
+
+            // Update individual counts
+            const updateCount = (id, count) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = `${count}개`;
             };
 
-            items.forEach(item => {
-                locationCounts[item.location]++;
-            });
+            updateCount('count-frontseat-left', frontseatLeft);
+            updateCount('count-frontseat-right', frontseatRight);
+            updateCount('count-backseat-left', backseatLeft);
+            updateCount('count-backseat-right', backseatRight);
+            updateCount('count-trunk-left', trunkLeft);
+            updateCount('count-trunk-center', trunkCenter);
+            updateCount('count-trunk-right', trunkRight);
 
-            Object.keys(locationCounts).forEach(loc => {
-                const el = document.getElementById(`count-${loc}`);
-                if (el) el.textContent = `${locationCounts[loc]}개`;
-            });
-
-            document.getElementById('backseatCount').textContent =
-                locationCounts['backseat-left'] + locationCounts['backseat-right'];
-            document.getElementById('trunkCount').textContent =
-                locationCounts['trunk-left'] + locationCounts['trunk-center'] + locationCounts['trunk-right'];
+            // Update area totals
+            document.getElementById('frontseatCount').textContent = frontseatLeft + frontseatRight;
+            document.getElementById('backseatCount').textContent = backseatLeft + backseatRight;
+            document.getElementById('trunkCount').textContent = trunkLeft + trunkCenter + trunkRight;
 
             // Category stats
             const categories = {};
@@ -1713,6 +1996,184 @@
             };
             reader.readAsText(file);
             event.target.value = '';
+        }
+
+        // ==================== Vehicle Image Management ====================
+        // Location coordinates (percentage based for SVG)
+        const locationCoordinates = {
+            'frontseat-left': { x: 35, y: 30 },
+            'frontseat-right': { x: 65, y: 30 },
+            'backseat-left': { x: 35, y: 52 },
+            'backseat-right': { x: 65, y: 52 },
+            'trunk-left': { x: 30, y: 76 },
+            'trunk-center': { x: 50, y: 76 },
+            'trunk-right': { x: 70, y: 76 }
+        };
+
+        function triggerImageUpload() {
+            document.getElementById('vehicleImageInput').click();
+        }
+
+        function handleVehicleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Check file type
+            if (!file.type.match('image/(jpeg|jpg|png)')) {
+                alert('JPG 또는 PNG 파일만 업로드 가능합니다.');
+                return;
+            }
+
+            // Check file size (2MB limit)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('파일 크기는 2MB 이하여야 합니다.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const currentVehicle = vehicles.find(v => v.id === currentVehicleId);
+                if (currentVehicle) {
+                    currentVehicle.vehicleImage = e.target.result;
+                    saveData();
+                    renderVehicleImage();
+                }
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function renderVehicleImage() {
+            // Always render markers since we have a default SVG image
+            renderLocationMarkers();
+        }
+
+        function renderLocationMarkers() {
+            const markersContainer = document.getElementById('locationMarkers');
+            const items = getCurrentItems();
+
+            // Count items per location
+            const locationCounts = {};
+            items.forEach(item => {
+                locationCounts[item.location] = (locationCounts[item.location] || 0) + 1;
+            });
+
+            const locationNames = {
+                'frontseat-left': '앞자리 운전석',
+                'frontseat-right': '앞자리 조수석',
+                'backseat-left': '뒷자리 좌측',
+                'backseat-right': '뒷자리 우측',
+                'trunk-left': '트렁크 좌측',
+                'trunk-center': '트렁크 중앙',
+                'trunk-right': '트렁크 우측'
+            };
+
+            // Generate markers
+            const markersHtml = Object.keys(locationCoordinates).map(location => {
+                const coords = locationCoordinates[location];
+                const count = locationCounts[location] || 0;
+                const locationItems = items.filter(item => item.location === location);
+
+                const categoryIcons = {
+                    '공구': '🔧',
+                    '비상용품': '🚨',
+                    '레저용품': '⚽',
+                    '생활용품': '🏠',
+                    '기타': '📌'
+                };
+
+                const popupContent = locationItems.length > 0 ? `
+                    <div class="marker-popup">
+                        <div class="popup-title">${locationNames[location]}</div>
+                        <div class="popup-items">
+                            ${locationItems.map(item => `
+                                <div class="popup-item">
+                                    ${categoryIcons[item.category] || '📦'} ${item.name} ×${item.quantity}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : `
+                    <div class="marker-popup">
+                        <div class="popup-title">${locationNames[location]}</div>
+                        <div class="popup-items">물건 없음</div>
+                    </div>
+                `;
+
+                return `
+                    <div class="location-marker" style="left: ${coords.x}%; top: ${coords.y}%;">
+                        <div class="marker-badge ${count === 0 ? 'empty' : ''}">${count}</div>
+                        ${popupContent}
+                    </div>
+                `;
+            }).join('');
+
+            markersContainer.innerHTML = markersHtml;
+        }
+
+        function removeVehicleImage() {
+            if (!confirm('차량 이미지를 삭제하시겠습니까?')) {
+                return;
+            }
+
+            const currentVehicle = vehicles.find(v => v.id === currentVehicleId);
+            if (currentVehicle) {
+                delete currentVehicle.vehicleImage;
+                saveData();
+                renderVehicleImage();
+            }
+        }
+
+        // ==================== Search Location Highlight ====================
+        function highlightSearchLocations(filteredItems) {
+            // Get unique locations from filtered items
+            const searchLocations = [...new Set(filteredItems.map(item => item.location))];
+
+            // Clear previous highlights
+            clearLocationHighlights();
+
+            // Add highlight class to matching markers
+            searchLocations.forEach(location => {
+                const markers = document.querySelectorAll('.location-marker');
+                markers.forEach(marker => {
+                    const markerStyle = marker.style.cssText;
+                    const coords = locationCoordinates[location];
+                    if (coords && markerStyle.includes(`left: ${coords.x}%`) && markerStyle.includes(`top: ${coords.y}%`)) {
+                        marker.classList.add('highlight');
+                        const badge = marker.querySelector('.marker-badge');
+                        if (badge) {
+                            badge.classList.add('highlight');
+                        }
+                    }
+                });
+            });
+
+            // Auto-scroll to vehicle image section if there are matches
+            if (searchLocations.length > 0) {
+                scrollToVehicleImage();
+            }
+        }
+
+        function clearLocationHighlights() {
+            const markers = document.querySelectorAll('.location-marker');
+            markers.forEach(marker => {
+                marker.classList.remove('highlight');
+                const badge = marker.querySelector('.marker-badge');
+                if (badge) {
+                    badge.classList.remove('highlight');
+                }
+            });
+        }
+
+        function scrollToVehicleImage() {
+            const imageSection = document.getElementById('vehicleImageSection');
+
+            // Always scroll to vehicle image section
+            if (imageSection) {
+                setTimeout(() => {
+                    imageSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
         }
 
         // ==================== Theme ====================
